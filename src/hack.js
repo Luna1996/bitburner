@@ -1,4 +1,4 @@
 /**
- * @param {import("../NetscriptDefinitions").NS} ns
+ * @param {import("../docs").NS} ns
  */
-export async function main(ns) {}
+export async function main(ns) { }
