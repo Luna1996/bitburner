@@ -1,0 +1,7 @@
+{
+  "bitburner.authToken": "E+W+m/UaswnJzb/SPH12qtlbG7+Ds4DiL8aPCW5ihwn2Ybu/Pz9LHY/tXG81mnk7",
+  "bitburner.fileWatcher.enable": true,
+  "bitburner.showFileWatcherEnabledNotification": true,
+  "bitburner.showPushSuccessNotification": true,
+  "bitburner.scriptRoot": "./src"
+}
