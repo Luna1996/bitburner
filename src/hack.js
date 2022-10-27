@@ -1,5 +1,5 @@
 /** @param {import('./tool').NS} ns */
 export async function main(ns) {
-  ns.tail();
-  ns.print(ns.scan('n00dles'));
+  console.log(ns.ui.getTheme())
+  ns.alert(`<p style="line-height:1">${'│fu<span style="color:green">c</span>k\n'.repeat(10)}</p>`);
 }
