@@ -1,6 +1,6 @@
 /**
  * @typedef {import('../docs').NS} NS
- * @typedef {Object.<string, {last: string, next: string[]}>} Tree
+ * @typedef {Object.<string, {last: string, next: string[], show: boolean}>} Tree
  */
 
 /**

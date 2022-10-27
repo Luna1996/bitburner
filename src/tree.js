@@ -2,19 +2,25 @@ import { getTree } from './tool';
 
 /** @param {import('./tool').NS} ns */
 export async function main(ns) {
-  ns.disableLog('ALL');
-  ns.tail();
-  let tree = getTree(ns);
-  printTree('home', 0);
+  window.tree = getTree(ns);
+  let html = '';
 
   /** 
    * @param {string} host
-   * @param {number} deep
+   * @param {string} pref
   */
-  function printTree(host, deep) {
-    ns.print(`${' '.repeat(deep)}${host}`);
-    for (let next of tree[host].next) {
-      printTree(next, deep + 1);
+  function printTree(host, pref = '') {
+    html += `${pref}${host}\n`;
+    pref = pref.replaceAll('├─', '│&nbsp;')
+    pref = pref.replaceAll('└─', '&nbsp;&nbsp;')
+    const next = window.tree[host].next;
+    if (next.length == 0) return;
+    for (let node of next.slice(0, -1)) {
+      printTree(node, pref + '├─');
     }
+    printTree(next[next.length - 1], pref + '└─')
   }
+
+  printTree('home');
+  ns.alert(`<p style='line-height:1;user-select:none;'>${html}</p>`);
 }

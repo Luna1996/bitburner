@@ -1,5 +1,5 @@
 /** @param {import('./tool').NS} ns */
 export async function main(ns) {
-  console.log(ns.ui.getTheme())
-  ns.alert(`<p style="line-height:1">${'│fu<span style="color:green">c</span>k\n'.repeat(10)}</p>`);
+  window.hack = 0;
+  ns.alert(`<p id='hack' onclick='const item = document.getElementById("hack");hack += 1;item.innerHTML = "FUCK" + hack;'>FUCK0</p>`);
 }
