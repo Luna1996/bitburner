@@ -1,5 +1,7 @@
+import { exec } from './tool';
+
 /** @param {import('./tool').NS} ns */
 export async function main(ns) {
-  window.hack = 0;
-  ns.alert(`<p id='hack' onclick='const item = document.getElementById("hack");hack += 1;item.innerHTML = "FUCK" + hack;'>FUCK0</p>`);
+  const a = { b: 1 };
+  extra.printRaw(React.createElement('p', { onClick: () => { console.log(a.b); } }, 'fuck'));
 }
