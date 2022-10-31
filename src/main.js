@@ -1,12 +1,12 @@
-import { _cnct, _exec, getTree, _setEnablePrint, sudo, _printHTML } from './tool';
+import { cnct, execRaw, getTree, sudo, printHTML } from './tool';
 
 /** @param {import('./tool').NS} ns */
 export async function main(ns) {
-  _exec('alias main="run main.js"');
-  _exec('alias tree="run tree.js"');
-  _exec('alias goto="run goto.js"');
-  _exec('alias test="run test.js"');
-  _exec('alias theme="run theme.js"');
+  execRaw('alias main="run main.js"');
+  execRaw('alias tree="run tree.js"');
+  execRaw('alias goto="run goto.js"');
+  execRaw('alias test="run test.js"');
+  execRaw('alias theme="run theme.js"');
 
 
   const theme = ns.ui.getTheme();
@@ -36,9 +36,10 @@ export async function main(ns) {
       for (const host in hacked) {
         const ram = ns.getServerMaxRam(host) - ns.getServerUsedRam(host);
         if (mem <= ram) {
-          _printHTML(`<span style='color:${theme.info}'>Plant ${name} on ${host}.</span>`);
-          _cnct(host);
-          _exec(`run ${name} ${args ? args.join(' ') : ''}`);
+          printHTML(`<span style='color:${theme.info}'>Plant ${name} on ${host}.</span>`);
+          cnct(host);
+          execRaw(`run ${name} ${args ? args.join(' ') : ''}`);
+          execRaw('home');
           progs.splice(i, 1);
         }
       }

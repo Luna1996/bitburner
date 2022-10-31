@@ -59,15 +59,13 @@ export function getTree(ns) {
   return tree;
 }
 
-export function _cnct(tree, host) {
+export function cnct(tree, host) {
   let cmd = '';
   while (host != 'home') {
     cmd = `connect ${host};${cmd}`;
     host = tree[host].last;
   }
-  _setEnablePrint(false);
-  _exec(`home;${cmd}`);
-  _setEnablePrint(true);
+  execRaw(`home;${cmd}`);
 }
 
 /** 
@@ -113,23 +111,23 @@ export function tryUpgradeHacknetNode(ns) {
   let num_node = hn.numNodes();
   if (money >= hn.getPurchaseNodeCost()) {
     ns.prognet.purchaseNode();
-    _printHTML(`<span style='color:${theme.money}'>+ node${num_node}</span>`);
+    printHTML(`<span style='color:${theme.money}'>+ node${num_node}</span>`);
     return true;
   }
   for (let i = 0; i < num_node; i++) {
     if (money >= hn.getLevelUpgradeCost(i, 1)) {
       hn.upgradeLevel(i, 1);
-      _printHTML(`<span style='color:${theme.money}'>↑ node${num_node} level</span>`);
+      printHTML(`<span style='color:${theme.money}'>↑ node${num_node} level</span>`);
       return true;
     }
     if (money >= hn.getRamUpgradeCost(i, 1)) {
       hn.upgradeRam(i, 1);
-      _printHTML(`<span style='color:${theme.money}'>↑ node${num_node} ram</span>`);
+      printHTML(`<span style='color:${theme.money}'>↑ node${num_node} ram</span>`);
       return true;
     }
     if (money >= hn.getCoreUpgradeCost(i, 1)) {
       hn.upgradeCore(i, 1);
-      _printHTML(`<span style='color:${theme.money}'>↑ node${num_node} core</span>`);
+      printHTML(`<span style='color:${theme.money}'>↑ node${num_node} core</span>`);
       return true;
     }
   }
@@ -147,22 +145,19 @@ export function money(n) {
 }
 
 /** @type {()=>any[]} */
-export const _getOutputs = extra.outputs;
+export const getOutput = extra.getOutput;
 
 /** @type {(str:string)=>void} */
-export const _setInput = extra.input;
+export const setInput = extra.input;
 
 /** @type {()=>any} */
-export const _popOutput = extra.popOutput;
+export const popOutput = extra.popOutput;
 
 /** @type {(node:import('react').ReactElement)=>void} */
-export const _printNode = extra.printRaw;
+export const printNode = extra.printRaw;
 
 /** @type {(html:string)=>void} */
-export const _printHTML = (html) => { extra.printRaw(React.createElement('div', { style: { margin: 0 }, dangerouslySetInnerHTML: { __html: html } })); };
+export const printHTML = (html) => { extra.printRaw(React.createElement('div', { style: { margin: 0 }, dangerouslySetInnerHTML: { __html: html } })); };
 
 /** @type {(str:string)=>void} */
-export const _exec = extra['exec'];
-
-/** @type {(isEnable:boolean)=>void} */
-export const _setEnablePrint = extra.setEnablePrint;
+export const execRaw = extra.execRaw;

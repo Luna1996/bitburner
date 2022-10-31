@@ -1,24 +1,24 @@
-import { _popOutput } from './tool';
-
 /** @param {import('./tool').NS} ns */
 export async function main(ns) {
   ns.ui.setTheme(theme);
   ns.ui.setStyles(style);
 
-  const theme = ns.ui.getTheme();
   for (let file of files) {
     printHTML(`<span style='color:${theme.secondary}'>Downloading ${file}...</span>`);
     if (await ns.wget(root + file, file, 'home')) {
-      _popOutput();
+      popOutput();
       printHTML(`<span style='color:${theme.success}'>Success download ${file}.</span>`);
     } else {
-      _popOutput();
+      popOutput();
       printHTML(`<span style='color:${theme.error}'>Fail download ${file}.</span>`);
     }
   };
 
   ns.atExit(() => { ns.exec('main.js', 'home'); });
 }
+
+/** @type {()=>any} */
+const popOutput = extra.popOutput;
 
 /** @type {(html:string)=>void} */
 const printHTML = (html) => { extra.printRaw(React.createElement('div', { style: { margin: 0 }, dangerouslySetInnerHTML: { __html: html } })); };

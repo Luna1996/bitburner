@@ -1,8 +1,8 @@
-import { _exec, getTree, _cnct, _printNode, _setInput, sudo, _popOutput, money } from './tool';
+import { getTree, popOutput, printNode, sudo } from './tool';
 
 /** @param {import('./tool').NS} ns */
 export async function main(ns) {
-  _popOutput();
+  popOutput();
   const tree = getTree(ns);
   const theme = ns.ui.getTheme();
   const hlv = ns.getHackingLevel();
@@ -20,7 +20,7 @@ export async function main(ns) {
       pref,
       React.createElement('span', {
         style: { color: root ? theme.success : (canRoot ? theme.primary : theme.secondary) },
-        onClick: () => _cnct(tree, host)
+        onClick: () => cnct(tree, host)
       }, host),
       canRoot && React.createElement('span', { style: { color: theme.secondary } }, ` ${ns.getServerMaxRam(host)}G`),
       hlv < shlv && canRoot && React.createElement('span', { style: { color: theme.error } }, ` Lv.${shlv}`),
@@ -37,5 +37,5 @@ export async function main(ns) {
     return item;
   }
 
-  _printNode(React.createElement('p', { style: { margin: 0, userSelect: 'none' } }, createTree('home')));
+  printNode(React.createElement('p', { style: { margin: 0, userSelect: 'none' } }, createTree('home')));
 }
