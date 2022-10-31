@@ -1,7 +1,36 @@
 /**
  * @typedef {import('../docs').NS} NS
  * @typedef {Object.<string, {last: string, next: string[], show: boolean}>} Tree
+ * @typedef {{r:number, g:number, b:number}} RGB
  */
+
+/**
+ * @param {string} hex
+ * @return {RGB}
+*/
+export function hexToRgb(hex) {
+  if (hex.length == 4) {
+    return {
+      r: parseInt(hex.charAt(1).repeat(2), 16),
+      g: parseInt(hex.charAt(2).repeat(2), 16),
+      b: parseInt(hex.charAt(3).repeat(2), 16),
+    };
+  }
+  else if (hex.length == 7) {
+    return {
+      r: parseInt(hex.substring(1, 3), 16),
+      g: parseInt(hex.substring(3, 5), 16),
+      b: parseInt(hex.substring(5, 7), 16),
+    };
+  }
+  throw 'Wrong HEX color format!';
+}
+
+/**
+ * @param {RGB} rgb
+ * @return {number}
+*/
+export function rgbToGray(rgb) { return 0.299 * rgb.r + 0.587 * rgb.g + 0.114 * rgb.b; }
 
 /**
  * @param {NS} ns

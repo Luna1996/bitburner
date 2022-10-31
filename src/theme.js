@@ -1,11 +1,17 @@
-import { printHTML } from './tool';
+import { hexToRgb, printHTML, rgbToGray } from './tool';
 
 /** @param {import('./tool').NS} ns */
 export async function main(ns) {
   const theme = ns.ui.getTheme();
+  const L = 60;
   let html = '';
   for (const name in theme) {
-    html += `<span style='color:${theme[name]};user-select:text;'>${name}</span>${' '.repeat(20 - name.length)}<span style='background-color:${theme[name]}'>${' '.repeat(35)}</span>\n`
+    const bg = theme[name];
+    const fg = rgbToGray(hexToRgb(bg)) >= 128 ? '#000' : '#fff';
+    html += `<span style='color:${fg};background-color:${bg};'>`;
+    html += `<span style='user-select:text;'>${name}</span> `;
+    html += `<span style='user-select:text;'>${bg}</span>${' '.repeat(L - name.length - bg.length - 1)}`
+    html += `</span>\n`;
   }
-  printHTML(`<p style='line-height:1;margin:0;user-select:none;'>${html}</p>`);
+  printHTML(`<span style='line-height:1.2;margin:0;user-select:none;'>${html}</p>`);
 }

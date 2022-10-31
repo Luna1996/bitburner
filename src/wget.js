@@ -1,6 +1,5 @@
 /** @param {import('./tool').NS} ns */
 export async function main(ns) {
-  ns.tail();
   ns.ui.setTheme(theme);
   ns.ui.setStyles(style);
 
@@ -9,7 +8,6 @@ export async function main(ns) {
   };
 
   ns.atExit(() => { ns.exec('main.js', 'home'); });
-  ns.closeTail();
 }
 
 const root = 'https://raw.githubusercontent.com/Luna1996/bitburner/master/src/';
@@ -51,4 +49,4 @@ const theme = {
   button: '#333'
 };
 /** @type {import('../docs').IStyleSettings} */
-const style = { fontFamily: 'Consolas', lineHeight: 1 };
+const style = { fontFamily: 'Consolas', lineHeight: 1.2 };
