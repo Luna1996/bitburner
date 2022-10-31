@@ -3,7 +3,7 @@ import { hexToRgb, printHTML, rgbToGray } from './tool';
 /** @param {import('./tool').NS} ns */
 export async function main(ns) {
   const theme = ns.ui.getTheme();
-  const L = 60;
+  const L = 50;
   let html = '';
   for (const name in theme) {
     const bg = theme[name];
