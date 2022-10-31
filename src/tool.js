@@ -73,14 +73,14 @@ export function sudo(ns, host, act = true) {
 /** @type {(str:string)=>void} */
 export const setInput = extra.input;
 
-/** @type {(str:string)=>void} */
-export const exec = extra.exec;
-
 /** @type {(node:import('react').ReactElement)=>void} */
 export const printNode = extra.printRaw;
 
 /** @type {(html:string)=>void} */
 export const printHTML = (html) => { extra.printRaw(React.createElement('div', { style: { margin: 0 }, dangerouslySetInnerHTML: { __html: html } })); };
+
+/** @type {(str:string)=>void} */
+export const exec = extra.exec;
 
 /** @type {(isEnable:boolean)=>void} */
 export const setEnablePrint = extra.setEnablePrint;
