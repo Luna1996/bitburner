@@ -1,6 +1,6 @@
 /**
  * @typedef {import('../docs').NS} NS
- * @typedef {Object.<string, {last: string, next: string[], show: boolean}>} Tree
+ * @typedef {Object.<string, {last: string, next: string[]}>} Tree
  * @typedef {{r:number, g:number, b:number}} RGB
  */
 
@@ -59,15 +59,15 @@ export function getTree(ns) {
   return tree;
 }
 
-export function goto(tree, host) {
+export function _cnct(tree, host) {
   let cmd = '';
   while (host != 'home') {
     cmd = `connect ${host};${cmd}`;
     host = tree[host].last;
   }
-  setEnablePrint(false);
-  exec(`home;${cmd}`);
-  setEnablePrint(true);
+  _setEnablePrint(false);
+  _exec(`home;${cmd}`);
+  _setEnablePrint(true);
 }
 
 /** 
@@ -79,23 +79,26 @@ export function goto(tree, host) {
 export function sudo(ns, host, act = true) {
   if (ns.hasRootAccess(host)) return true;
   const P = [
-    { file: 'BruteSSH.exe', port: 'sshPortOpen', hack: ns.brutessh },
-    { file: 'FTPCrack.exe', port: 'ftpPortOpen', hack: ns.ftpcrack },
-    { file: 'relaySMTP.exe', port: 'smtpPortOpen', hack: ns.relaysmtp },
-    { file: 'HTTPWorm.exe', port: 'httpPortOpen', hack: ns.httpworm },
-    { file: 'SQLInject.exe', port: 'sqlPortOpen', hack: ns.sqlinject }
+    { file: 'BruteSSH.exe', port: 'sshPortOpen', prog: ns.brutessh },
+    { file: 'FTPCrack.exe', port: 'ftpPortOpen', prog: ns.ftpcrack },
+    { file: 'relaySMTP.exe', port: 'smtpPortOpen', prog: ns.relaysmtp },
+    { file: 'HTTPWorm.exe', port: 'httpPortOpen', prog: ns.httpworm },
+    { file: 'SQLInject.exe', port: 'sqlPortOpen', prog: ns.sqlinject }
   ];
   const s = ns.getServer(host);
-  for (const { file, port, hack } of P.slice(0, s.numOpenPortsRequired)) {
+  for (const { file, port, prog } of P.slice(0, s.numOpenPortsRequired)) {
     if (!s[port]) {
       if (ns.fileExists(file, 'home')) {
-        if (act) hack(host);
+        if (act) prog(host);
       } else {
         return false;
       }
     }
   }
-  if (act) ns.nuke(host);
+  if (act) {
+    ns.nuke(host);
+    ns.scp(ns.ls('home', '.js'), host, 'home');
+  }
   return true;
 }
 
@@ -103,53 +106,63 @@ export function sudo(ns, host, act = true) {
  * @param {NS} ns
  * @return {boolean}
  */
-export function tryBuyHacknet(ns) {
-  const hn = ns.hacknet;
+export function tryUpgradeHacknetNode(ns) {
+  const hn = ns.prognet;
+  const theme = ns.ui.getTheme();
   let money = ns.getServerMoneyAvailable('home');
   let num_node = hn.numNodes();
   if (money >= hn.getPurchaseNodeCost()) {
-    ns.hacknet.purchaseNode();
-    printHTML(`buy node${num_node}`);
-    ns.print(`node${num_node}: new`);
+    ns.prognet.purchaseNode();
+    _printHTML(`<span style='color:${theme.money}'>+ node${num_node}</span>`);
     return true;
   }
   for (let i = 0; i < num_node; i++) {
     if (money >= hn.getLevelUpgradeCost(i, 1)) {
       hn.upgradeLevel(i, 1);
-      ns.print(`node${i}: level`);
+      _printHTML(`<span style='color:${theme.money}'>↑ node${num_node} level</span>`);
       return true;
     }
     if (money >= hn.getRamUpgradeCost(i, 1)) {
       hn.upgradeRam(i, 1);
-      ns.print(`node${i}: ram`);
+      _printHTML(`<span style='color:${theme.money}'>↑ node${num_node} ram</span>`);
       return true;
     }
     if (money >= hn.getCoreUpgradeCost(i, 1)) {
       hn.upgradeCore(i, 1);
-      ns.print(`node${i}: core`);
+      _printHTML(`<span style='color:${theme.money}'>↑ node${num_node} core</span>`);
       return true;
     }
   }
   return false;
 }
 
+/**
+ * @param {number} n
+ * @return {str}
+ */
+export function money(n) {
+  if (n < 1000) return `$${n}`;
+  if (n < 1000000) return `$${n / 1000}k`;
+  if (n < 1000000000) return `$${n / 1000000}b`
+}
+
 /** @type {()=>any[]} */
-export const outputs = extra.outputs;
+export const _getOutputs = extra.outputs;
 
 /** @type {(str:string)=>void} */
-export const setInput = extra.input;
+export const _setInput = extra.input;
 
 /** @type {()=>any} */
-export const popOutput = extra.popOutput;
+export const _popOutput = extra.popOutput;
 
 /** @type {(node:import('react').ReactElement)=>void} */
-export const printNode = extra.printRaw;
+export const _printNode = extra.printRaw;
 
 /** @type {(html:string)=>void} */
-export const printHTML = (html) => { extra.printRaw(React.createElement('div', { style: { margin: 0 }, dangerouslySetInnerHTML: { __html: html } })); };
+export const _printHTML = (html) => { extra.printRaw(React.createElement('div', { style: { margin: 0 }, dangerouslySetInnerHTML: { __html: html } })); };
 
 /** @type {(str:string)=>void} */
-export const exec = extra.exec;
+export const _exec = extra['exec'];
 
 /** @type {(isEnable:boolean)=>void} */
-export const setEnablePrint = extra.setEnablePrint;
+export const _setEnablePrint = extra.setEnablePrint;

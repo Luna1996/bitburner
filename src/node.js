@@ -1,4 +1,4 @@
-import { tryBuyHacknet as tryUpgradeHacknetNode } from './tool';
+import { tryUpgradeHacknetNode } from './tool';
 
 /** @param {import('./tool').NS} ns */
 export async function main(ns) {

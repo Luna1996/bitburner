@@ -1,4 +1,4 @@
-import { popOutput } from './tool';
+import { _popOutput } from './tool';
 
 /** @param {import('./tool').NS} ns */
 export async function main(ns) {
@@ -9,10 +9,10 @@ export async function main(ns) {
   for (let file of files) {
     printHTML(`<span style='color:${theme.secondary}'>Downloading ${file}...</span>`);
     if (await ns.wget(root + file, file, 'home')) {
-      popOutput();
+      _popOutput();
       printHTML(`<span style='color:${theme.success}'>Success download ${file}.</span>`);
     } else {
-      popOutput();
+      _popOutput();
       printHTML(`<span style='color:${theme.error}'>Fail download ${file}.</span>`);
     }
   };

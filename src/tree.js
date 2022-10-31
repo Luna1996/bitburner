@@ -1,9 +1,11 @@
-import { exec, getTree, goto, printNode, setInput, sudo } from './tool';
+import { _exec, getTree, _cnct, _printNode, _setInput, sudo, _popOutput, money } from './tool';
 
 /** @param {import('./tool').NS} ns */
 export async function main(ns) {
+  _popOutput();
   const tree = getTree(ns);
   const theme = ns.ui.getTheme();
+  const hlv = ns.getHackingLevel();
 
   /** 
    * @param {string} host
@@ -11,11 +13,19 @@ export async function main(ns) {
    * @return {import('react').ReactNode}
   */
   function createTree(host, pref = '') {
-    const item = [pref, React.createElement('span', {
-      dataName: host,
-      style: { color: ns.hasRootAccess(host) ? theme.success : (sudo(ns, host, false) ? theme.successdark : theme.secondary) },
-      onClick: () => goto(tree, host)
-    }, host), '\n'];
+    const root = ns.hasRootAccess(host);
+    const canRoot = sudo(ns, host, false)
+    const shlv = ns.getServerRequiredHackingLevel(host);
+    const item = [
+      pref,
+      React.createElement('span', {
+        style: { color: root ? theme.success : (canRoot ? theme.primary : theme.secondary) },
+        onClick: () => _cnct(tree, host)
+      }, host),
+      canRoot && React.createElement('span', { style: { color: theme.secondary } }, ` ${ns.getServerMaxRam(host)}G`),
+      hlv < shlv && canRoot && React.createElement('span', { style: { color: theme.error } }, ` Lv.${shlv}`),
+      hlv >= shlv && canRoot && host != 'home' && React.createElement('span', { style: { color: theme.money } }, ` ${money(ns.getServerMaxMoney(host))}`),
+      '\n'];
     pref = pref.replaceAll('├─', '│ ').replaceAll('└─', '  ');
     const next = tree[host].next;
     if (next.length > 0) {
@@ -27,5 +37,5 @@ export async function main(ns) {
     return item;
   }
 
-  printNode(React.createElement('p', { style: { margin: 0, lineHeight: 1, userSelect: 'none' } }, createTree('home')));
+  _printNode(React.createElement('p', { style: { margin: 0, userSelect: 'none' } }, createTree('home')));
 }
