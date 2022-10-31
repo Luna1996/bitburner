@@ -4,13 +4,16 @@ export async function main(ns) {
   ns.ui.setStyles(style);
 
   for (let file of files) {
-    await ns.wget(root + file, file, 'home');
+    printHTML(await ns.wget(root + file, file, 'home'));
   };
 
   ns.atExit(() => { ns.exec('main.js', 'home'); });
 }
 
-const root = 'https://cdn.githubraw.com/Luna1996/bitburner/fa8d8d4a/src/';
+/** @type {(html:string)=>void} */
+const printHTML = (html) => { extra.printRaw(React.createElement('div', { style: { margin: 0 }, dangerouslySetInnerHTML: { __html: html } })); };
+
+const root = 'https://githubraw.com/Luna1996/bitburner/master/src/';
 const files = ['goto.js', 'hack.js', 'main.js', 'node.js', 'theme.js', 'tool.js', 'tree.js'];
 /** @type {import('../docs').UserInterfaceTheme} */
 const theme = {

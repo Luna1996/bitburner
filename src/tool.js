@@ -133,8 +133,14 @@ export function tryBuyHacknet(ns) {
   return false;
 }
 
+/** @type {any[]} */
+export const outputs = extra.outputs;
+
 /** @type {(str:string)=>void} */
 export const setInput = extra.input;
+
+/** @type {()=>any} */
+export const popOutput = extra.popOutput;
 
 /** @type {(node:import('react').ReactElement)=>void} */
 export const printNode = extra.printRaw;
