@@ -37,7 +37,7 @@ export async function main(ns) {
         const ram = ns.getServerMaxRam(host) - ns.getServerUsedRam(host);
         if (mem <= ram) {
           printHTML(`<span style='color:${theme.info}'>Plant ${name} on ${host}.</span>`);
-          cnct(host);
+          cnct(tree, host);
           execRaw(`run ${name} ${args ? args.join(' ') : ''}`);
           execRaw('home');
           progs.splice(i, 1);

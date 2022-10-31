@@ -23,7 +23,7 @@ const popOutput = extra.popOutput;
 /** @type {(html:string)=>void} */
 const printHTML = (html) => { extra.printRaw(React.createElement('div', { style: { margin: 0 }, dangerouslySetInnerHTML: { __html: html } })); };
 
-const root = 'https://githubraw.com/Luna1996/bitburner/master/src/';
+const root = 'https://cdn.githubraw.com/Luna1996/bitburner/20f6d15e/src/';
 const files = ['goto.js', 'hack.js', 'main.js', 'node.js', 'theme.js', 'tool.js', 'tree.js', 'test.js'];
 /** @type {import('../docs').UserInterfaceTheme} */
 const theme = {
