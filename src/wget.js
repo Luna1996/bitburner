@@ -1,10 +1,20 @@
+import { popOutput } from './tool';
+
 /** @param {import('./tool').NS} ns */
 export async function main(ns) {
   ns.ui.setTheme(theme);
   ns.ui.setStyles(style);
 
+  const theme = ns.ui.getTheme();
   for (let file of files) {
-    printHTML(await ns.wget(root + file, file, 'home'));
+    printHTML(`<span style='color:${theme.secondary}'>Downloading ${file}...</span>`);
+    if (await ns.wget(root + file, file, 'home')) {
+      popOutput();
+      printHTML(`<span style='color:${theme.success}'>Success download ${file}.</span>`);
+    } else {
+      popOutput();
+      printHTML(`<span style='color:${theme.error}'>Fail download ${file}.</span>`);
+    }
   };
 
   ns.atExit(() => { ns.exec('main.js', 'home'); });
@@ -14,7 +24,7 @@ export async function main(ns) {
 const printHTML = (html) => { extra.printRaw(React.createElement('div', { style: { margin: 0 }, dangerouslySetInnerHTML: { __html: html } })); };
 
 const root = 'https://githubraw.com/Luna1996/bitburner/master/src/';
-const files = ['goto.js', 'hack.js', 'main.js', 'node.js', 'theme.js', 'tool.js', 'tree.js'];
+const files = ['goto.js', 'hack.js', 'main.js', 'node.js', 'theme.js', 'tool.js', 'tree.js', 'test.js'];
 /** @type {import('../docs').UserInterfaceTheme} */
 const theme = {
   primarylight: '#E0E0BC',

@@ -133,7 +133,7 @@ export function tryBuyHacknet(ns) {
   return false;
 }
 
-/** @type {any[]} */
+/** @type {()=>any[]} */
 export const outputs = extra.outputs;
 
 /** @type {(str:string)=>void} */
