@@ -41,6 +41,7 @@ export async function main(ns) {
           execRaw(`run ${name} ${args ? args.join(' ') : ''}`);
           execRaw('home');
           progs.splice(i, 1);
+          break;
         }
       }
     }

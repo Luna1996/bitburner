@@ -105,12 +105,12 @@ export function sudo(ns, host, act = true) {
  * @return {boolean}
  */
 export function tryUpgradeHacknetNode(ns) {
-  const hn = ns.prognet;
+  const hn = ns.hacknet;
   const theme = ns.ui.getTheme();
   let money = ns.getServerMoneyAvailable('home');
   let num_node = hn.numNodes();
   if (money >= hn.getPurchaseNodeCost()) {
-    ns.prognet.purchaseNode();
+    hn.purchaseNode();
     printHTML(`<span style='color:${theme.money}'>+ node${num_node}</span>`);
     return true;
   }
