@@ -70,6 +70,40 @@ export function sudo(ns, host, act = true) {
   return true;
 }
 
+/** 
+ * @param {NS} ns
+ * @return {boolean}
+ */
+export function tryBuyHacknet(ns) {
+  const hn = ns.hacknet;
+  let money = ns.getServerMoneyAvailable('home');
+  let num_node = hn.numNodes();
+  if (money >= hn.getPurchaseNodeCost()) {
+    ns.hacknet.purchaseNode();
+    printHTML(`buy node${num_node}`);
+    ns.print(`node${num_node}: new`);
+    return true;
+  }
+  for (let i = 0; i < num_node; i++) {
+    if (money >= hn.getLevelUpgradeCost(i, 1)) {
+      hn.upgradeLevel(i, 1);
+      ns.print(`node${i}: level`);
+      return true;
+    }
+    if (money >= hn.getRamUpgradeCost(i, 1)) {
+      hn.upgradeRam(i, 1);
+      ns.print(`node${i}: ram`);
+      return true;
+    }
+    if (money >= hn.getCoreUpgradeCost(i, 1)) {
+      hn.upgradeCore(i, 1);
+      ns.print(`node${i}: core`);
+      return true;
+    }
+  }
+  return false;
+}
+
 /** @type {(str:string)=>void} */
 export const setInput = extra.input;
 
