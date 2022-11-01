@@ -1,5 +1,5 @@
 import { addScript, hacked, printHTML } from './tool';
-import { theme } from './wget';
+import { theme } from './init1';
 
 /** @typedef {SEEK|WEAK|GROW|HACK} Phase */
 

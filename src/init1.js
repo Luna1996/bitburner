@@ -1,9 +1,17 @@
 /** @param {import('./tool').NS} ns */
 export async function main(ns) {
   popOutput();
+
   printHTML('Setting theme & style.');
   ns.ui.setTheme(theme);
   ns.ui.setStyles(style);
+
+  printHTML('Setting alias: main, tree, goto, test, theme.');
+  execRaw('alias main="run main.js"');
+  execRaw('alias tree="run tree.js"');
+  execRaw('alias goto="run goto.js"');
+  execRaw('alias test="run test.js"');
+  execRaw('alias theme="run theme.js"');
 
   for (let file of files) {
     while (true) {
@@ -14,16 +22,12 @@ export async function main(ns) {
         break;
       } else {
         popOutput();
-        printHTML(`<span style='color:${theme.error}'>Fail download ${file}.</span>`);
+        printHTML(`<span style='color:${theme.error}'>Fail download ${file}!</span>`);
+        ns.tail();
       }
     }
   };
-
-  ns.atExit(() => {
-    if (!ns.exec('init.js', 'home')) {
-      printHTML(`<span style='color:${theme.error}'>Fail running init.</span>`);
-    }
-  });
+  execRaw('home;run init2.js');
 }
 
 /** @type {(str:string)=>void} */
@@ -36,7 +40,7 @@ const popOutput = extra.popOutput;
 const printHTML = (html) => { extra.printRaw(React.createElement('div', { style: { margin: 0 }, dangerouslySetInnerHTML: { __html: html } })); };
 
 const root = 'https://githubraw.com/Luna1996/bitburner/master/src/';
-export const files = ['weaker.js', 'wget.js', 'tool.js', 'init.js', 'main.js', 'goto.js', 'hack.js', 'node.js', 'theme.js', 'tree.js', 'test.js'];
+export const files = ['tool.js', 'init2.js', 'init3.js', 'main.js', 'node.js', 'hack.js', 'theme.js', 'tree.js', 'goto.js', 'test.js', 'weaker.js'];
 /** @type {import('../docs').UserInterfaceTheme} */
 export const theme = {
   primarylight: '#E0E0BC',

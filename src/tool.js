@@ -1,4 +1,4 @@
-import { theme } from './wget';
+import { theme } from './init1';
 
 /**
  * @typedef {import('../docs').NS} NS
@@ -179,6 +179,7 @@ function fillJobs(scripts) {
   return list;
 }
 
+/** @param {NS} ns */
 export function hackAll(ns) {
   for (let host in tree) {
     if (hacked[host]) continue;
@@ -221,6 +222,7 @@ export function rgbToGray(rgb) { return 0.299 * rgb.r + 0.587 * rgb.g + 0.114 * 
 
 /** @param {NS} ns */
 export function updateTree(ns) {
+  printHTML('Updating the Tree.');
   /** @type {Tree} */
   tree = { 'home': {} };
   let more = ['home'];
