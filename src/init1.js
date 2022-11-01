@@ -2,11 +2,11 @@
 export async function main(ns) {
   popOutput();
 
-  printHTML('Setting theme & style.');
+  printHTML('Setting theme & style;');
   ns.ui.setTheme(theme);
   ns.ui.setStyles(style);
 
-  printHTML('Setting alias: main, tree, goto, test, theme.');
+  printHTML('Setting alias: main, tree, goto, test, theme;');
   execRaw('alias main="run main.js"');
   execRaw('alias tree="run tree.js"');
   execRaw('alias goto="run goto.js"');
@@ -18,7 +18,7 @@ export async function main(ns) {
       printHTML(`<span style='color:${theme.secondary}'>Downloading ${file}...</span>`);
       if (await ns.wget(root + file, file, 'home')) {
         popOutput();
-        printHTML(`Success download ${file}.`);
+        printHTML(`Success download ${file};`);
         break;
       } else {
         popOutput();
@@ -27,7 +27,7 @@ export async function main(ns) {
       }
     }
   };
-  execRaw('home;run init2.js');
+  execRaw('home;run init2.js;');
 }
 
 /** @type {(str:string)=>void} */

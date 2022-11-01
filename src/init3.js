@@ -4,5 +4,5 @@ import { hackAll } from './tool';
 export async function main(ns) {
   hackAll(ns);
   addScript({ name: 'node.js' }, { name: 'hack.js' });
-  execRaw('home;run main.js');
+  execRaw('home;run main.js;');
 }
