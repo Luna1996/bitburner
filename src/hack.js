@@ -1,5 +1,4 @@
-import { addScript, hacked, printHTML } from './tool';
-import { theme } from './init1';
+import { addScript, printHTML } from './tool';
 
 /** @typedef {SEEK|WEAK|GROW|HACK} Phase */
 
@@ -10,6 +9,7 @@ const HACK = 3;
 
 /** @param {import('./tool').NS} ns */
 export async function main(ns) {
+  const theme = ns.ui.getTheme();
   /** @type {string} */
   let victim;
   /** @type {{name: string, profit: number}} */
@@ -24,7 +24,7 @@ export async function main(ns) {
   while (true) {
     const hackingLevel = ns.getHackingLevel();
     newVictim = {};
-    for (const host in hacked) {
+    for (const host in extra.hacked) {
       if (host == 'home' || ns.getServerRequiredHackingLevel(host) > hackingLevel) { continue; }
       const profit = ns.hackAnalyze(host) * ns.getServerMaxMoney(host) / ns.getHackTime(host);
       if (!newVictim.name || newVictim.profit < profit) {

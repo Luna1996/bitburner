@@ -9,19 +9,19 @@ import { theme } from './init1';
  */
 
 /** @type {import('./tool').Tree} */
-export let tree = null;
+extra.tree = null
 /** @type {Object.<string, {}>} */
-export const hacked = { 'home': {} };
+extra.hacked = { 'home': {} };
 /** @type {(Script|ScriptGroup)[]} */
-export const scripts = [];
+extra.scripts = [];
 
 /** @param {Script[]|ScriptGroup[]} script */
-export function addScript(...script) { scripts.push(...script); }
+export function addScript(...script) { extra.scripts.push(...script); }
 
 /** @param {NS} ns */
 export function runScript(ns) {
-  for (let i = scripts.length - 1; i >= 0; i--) {
-    const item = scripts[i];
+  for (let i = extra.scripts.length - 1; i >= 0; i--) {
+    const item = extra.scripts[i];
     if (item.group) {
       const answ = fillJobs(item.group);
       if (answ) {
@@ -29,10 +29,10 @@ export function runScript(ns) {
           item.n -= 1;
           i++;
         } else {
-          scripts.splice(i, 1);
+          extra.scripts.splice(i, 1);
         }
         for (const { svrName: host, script: { name, n, args, onRun } } of answ) {
-          const id = ns.exec(name, host, n, ...args);
+          const id = ns.exec(name, host, n, ...(args ?? []));
           if (onRun) onRun(id);
           printHTML(
             `<span style='color:${theme.secondary}'>[${id}]</span>` +
@@ -48,7 +48,7 @@ export function runScript(ns) {
       const mem = ns.getScriptRam(name, 'home');
       /** @type {{name: string, left: number}} */
       let target;
-      for (const host in hacked) {
+      for (const host in extra.hacked) {
         const ramLeft = ns.getServerMaxRam(host) - ns.getServerUsedRam(host) - mem;
         if (ramLeft >= 0 && (!target || ramLeft < target.left)) {
           target = { name: host, left: ramLeft };
@@ -59,9 +59,9 @@ export function runScript(ns) {
           script.n -= 1;
           i++;
         } else {
-          scripts.splice(i, 1);
+          extra.scripts.splice(i, 1);
         }
-        const id = ns.exec(name, target.name, 1, ...args);
+        const id = ns.exec(name, target.name, 1, ...(args ?? []));
         if (script.onRun) script.onRun(id);
         printHTML(
           `<span style='color:${theme.secondary}'>[${id}]</span>` +
@@ -87,7 +87,7 @@ function fillJobs(scripts) {
   /** @type {Object.<string, Svr>} */
   const svrMap = {};
   let totalSvrRam = 0;
-  for (const svrName in hacked) {
+  for (const svrName in extra.hacked) {
     const svrRam = ns.getServerMaxRam(svrName) - ns.getServerUsedRam(svrName);
     if (svrRam > 0) {
       const svr = { svrName, svrRam };
@@ -179,19 +179,6 @@ function fillJobs(scripts) {
   return list;
 }
 
-/** @param {NS} ns */
-export function hackAll(ns) {
-  for (let host in tree) {
-    if (hacked[host]) continue;
-    if (ns.hasRootAccess(host)) {
-      hacked[host] = {};
-    } else if (sudo(ns, host)) {
-      printHTML(`<span style='color:${theme.success}'>Gain root access of ${host}.</span>`);
-      hacked[host] = {};
-    }
-  }
-}
-
 /**
  * @param {string} hex
  * @return {RGB}
@@ -224,7 +211,7 @@ export function rgbToGray(rgb) { return 0.299 * rgb.r + 0.587 * rgb.g + 0.114 * 
 export function updateTree(ns) {
   printHTML('Updating the Tree;');
   /** @type {Tree} */
-  tree = { 'home': {} };
+  const tree = { 'home': {} };
   let more = ['home'];
   while (more.length != 0) {
     let host = more.shift();
@@ -242,15 +229,29 @@ export function updateTree(ns) {
     }
     tree[host].next = next;
   }
+  extra.tree = tree;
 }
 
 export function goto(host) {
   let cmd = '';
   while (host != 'home') {
     cmd = `connect ${host};${cmd}`;
-    host = tree[host].last;
+    host = extra.tree[host].last;
   }
   execRaw(`home;${cmd}`);
+}
+
+/** @param {NS} ns */
+export function hackAll(ns) {
+  for (let host in extra.tree) {
+    if (extra.hacked[host]) continue;
+    if (ns.hasRootAccess(host)) {
+      extra.hacked[host] = {};
+    } else if (sudo(ns, host)) {
+      printHTML(`<span style='color:${theme.success}'>Gain root access of ${host}.</span>`);
+      extra.hacked[host] = {};
+    }
+  }
 }
 
 /** 

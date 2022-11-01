@@ -1,10 +1,10 @@
-import { updateTree, money, popOutput, printNode, sudo, tree, goto } from './tool';
-import { theme } from './wget';
+import { updateTree, money, popOutput, printNode, sudo, goto } from './tool';
 
 /** @param {import('./tool').NS} ns */
 export async function main(ns) {
   popOutput();
   updateTree(ns);
+  const theme = ns.ui.getTheme();
   const hlv = ns.getHackingLevel();
 
   /** 
@@ -20,14 +20,14 @@ export async function main(ns) {
       pref,
       React.createElement('span', {
         style: { color: root ? theme.success : (canRoot ? theme.primary : theme.secondary) },
-        onClick: () => goto(tree, host)
+        onClick: () => goto(extra.tree, host)
       }, host),
       canRoot && React.createElement('span', { style: { color: theme.secondary } }, ` ${ns.getServerMaxRam(host)}G`),
       hlv < shlv && canRoot && React.createElement('span', { style: { color: theme.error } }, ` Lv.${shlv}`),
       hlv >= shlv && canRoot && host != 'home' && React.createElement('span', { style: { color: theme.money } }, ` ${money(ns.getServerMaxMoney(host))}`),
       '\n'];
     pref = pref.replaceAll('├─', '│ ').replaceAll('└─', '  ');
-    const next = tree[host].next;
+    const next = extra.tree[host].next;
     if (next.length > 0) {
       for (let node of next.slice(0, -1)) {
         item.push(createTree(node, pref + '├─'));
