@@ -1,6 +1,7 @@
-import { getTree, cnct } from './tool';
+import { tree } from './main';
+import { cnct } from './tool';
 
 /** @param {import('./tool').NS} ns */
 export async function main(ns) {
-  cnct(getTree(ns), ns.args[0])
+  cnct(ns.args[0])
 }

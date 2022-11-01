@@ -1,8 +1,17 @@
+import { theme } from './wget';
+
 /**
  * @typedef {import('../docs').NS} NS
  * @typedef {Object.<string, {last: string, next: string[]}>} Tree
  * @typedef {{r:number, g:number, b:number}} RGB
  */
+
+/** @type {import('./tool').Tree} */
+export let tree = null;
+/** @type {Object.<string, {}>} */
+export const hacked = { 'home': {} };
+/** @type {{name:string, args:any[]}[]} */
+export const progs = [];
 
 /**
  * @param {string} hex
@@ -59,7 +68,7 @@ export function getTree(ns) {
   return tree;
 }
 
-export function cnct(tree, host) {
+export function cnct(host) {
   let cmd = '';
   while (host != 'home') {
     cmd = `connect ${host};${cmd}`;
@@ -106,7 +115,6 @@ export function sudo(ns, host, act = true) {
  */
 export function tryUpgradeHacknetNode(ns) {
   const hn = ns.hacknet;
-  const theme = ns.ui.getTheme();
   let money = ns.getServerMoneyAvailable('home');
   let num_node = hn.numNodes();
   if (money >= hn.getPurchaseNodeCost()) {

@@ -1,4 +1,4 @@
-import { cnct, execRaw, getTree, sudo, printHTML } from './tool';
+import { cnct, execRaw, getTree, sudo, printHTML, tree, hacked, progs } from './tool';
 import { theme } from './wget';
 
 /** @param {import('./tool').NS} ns */
@@ -33,7 +33,7 @@ export async function main(ns) {
         const ram = ns.getServerMaxRam(host) - ns.getServerUsedRam(host);
         if (mem <= ram) {
           printHTML(`<span style='color:${theme.info}'>Plant ${name} on ${host}.</span>`);
-          cnct(tree, host);
+          cnct(host);
           execRaw(`run ${name} ${args ? args.join(' ') : ''}`);
           execRaw('home');
           progs.splice(i, 1);
@@ -50,10 +50,3 @@ export async function main(ns) {
     await ns.asleep(1000);
   }
 }
-
-/** @type {import('./tool').Tree} */
-export let tree = null;
-/** @type {Object.<string, {}>} */
-export const hacked = { 'home': {} };
-/** @type {{name:string, args:any[]}[]} */
-export const progs = [];
