@@ -43,11 +43,10 @@ export function rgbToGray(rgb) { return 0.299 * rgb.r + 0.587 * rgb.g + 0.114 * 
 
 /**
  * @param {NS} ns
- * @return {Tree}
 */
-export function getTree(ns) {
+export function updateTree(ns) {
   /** @type {Tree} */
-  let tree = { 'home': {} };
+  tree = { 'home': {} };
   let more = ['home'];
   while (more.length != 0) {
     let host = more.shift();
@@ -65,7 +64,6 @@ export function getTree(ns) {
     }
     tree[host].next = next;
   }
-  return tree;
 }
 
 export function cnct(host) {

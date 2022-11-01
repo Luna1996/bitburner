@@ -1,4 +1,4 @@
-import { cnct, execRaw, getTree, sudo, printHTML, tree, hacked, progs } from './tool';
+import { cnct, execRaw, updateTree, sudo, printHTML, tree, hacked, progs } from './tool';
 import { theme } from './wget';
 
 /** @param {import('./tool').NS} ns */
@@ -10,7 +10,7 @@ export async function main(ns) {
   execRaw('alias theme="run theme.js"');
 
 
-  tree = getTree(ns);
+  updateTree(ns);
 
   const hackAll = () => {
     for (let host in tree) {

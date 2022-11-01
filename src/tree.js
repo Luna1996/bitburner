@@ -1,10 +1,10 @@
-import { getTree, money, popOutput, printNode, sudo } from './tool';
+import { updateTree, money, popOutput, printNode, sudo, tree } from './tool';
+import { theme } from './wget';
 
 /** @param {import('./tool').NS} ns */
 export async function main(ns) {
   popOutput();
-  const tree = getTree(ns);
-  const theme = ns.ui.getTheme();
+  updateTree(ns);
   const hlv = ns.getHackingLevel();
 
   /** 
