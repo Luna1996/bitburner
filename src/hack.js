@@ -32,7 +32,7 @@ export async function main(ns) {
         newVictim.profit = profit;
       }
     }
-    if (victim != newVictim.name) {
+    if (newVictim.name && victim != newVictim.name) {
       victim = newVictim.name;
       phase = SEEK;
     }
@@ -59,7 +59,8 @@ export async function main(ns) {
       switch (phase) {
         case WEAK: {
           const securityNeed = ns.getServerSecurityLevel(victim) - ns.getServerMinSecurityLevel(victim);
-          const weakNeed = Math.ceil(securityNeed / oneg);
+          const securityPerWeak = ns.weakenAnalyze(1);
+          const weakNeed = Math.ceil(securityNeed / securityPerWeak);
           addScript({ name: 'weaker.js', n: weakNeed, args: [victim], onRun: logId });
           printHTML(
             `<span style='color:${theme.info}'>Find new victim `
