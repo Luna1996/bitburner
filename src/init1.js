@@ -14,7 +14,7 @@ export async function main(ns) {
   execRaw('alias theme="run theme.js"');
 
   for (let file of files) {
-    while (!ns.fileExists(file)) {
+    while (true) {
       printHTML(`<span style='color:${theme.secondary}'>Downloading ${file}...</span>`);
       if (await ns.wget(root + file, file, 'home')) {
         popOutput();
