@@ -1,4 +1,4 @@
-import { execRaw, hackAll } from './tool';
+import { addScript, execRaw, hackAll } from './tool';
 
 /** @param {import('./tool').NS} ns */
 export async function main(ns) {
