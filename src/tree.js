@@ -1,4 +1,4 @@
-import { getTree, popOutput, printNode, sudo } from './tool';
+import { getTree, money, popOutput, printNode, sudo } from './tool';
 
 /** @param {import('./tool').NS} ns */
 export async function main(ns) {

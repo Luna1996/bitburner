@@ -11,10 +11,12 @@ export async function main(ns) {
 
   const theme = ns.ui.getTheme();
   const tree = getTree(ns);
-
   /** @type {Object.<string, {}>} */
   const hacked = { 'home': {} };
-  function hackAll() {
+  /** @type {{name:string, args:any[]}[]} */
+  const progs = [];
+
+  const hackAll = () => {
     for (let host in tree) {
       if (hacked[host]) continue;
       if (ns.hasRootAccess(host)) {
@@ -26,9 +28,7 @@ export async function main(ns) {
     }
   }
 
-  /** @type {{name:string, args:any[]}[]} */
-  const progs = [];
-  function plant() {
+  const plant = () => {
     for (let i = progs.length - 1; i >= 0; i--) {
       const name = progs[i].name;
       const args = progs[i].args;
@@ -50,7 +50,7 @@ export async function main(ns) {
   hackAll();
   progs.push({ name: 'node.js' });
   plant();
-  while (true) {
-    await ns.asleep(1000);
-  }
+  // while (true) {
+  //   await ns.asleep(1000);
+  // }
 }

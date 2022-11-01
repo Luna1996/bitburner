@@ -15,7 +15,7 @@ export async function main(ns) {
     }
   };
 
-  ns.atExit(() => { execRaw('run main.js'); });
+  execRaw('run main.js');
 }
 
 /** @type {(str:string)=>void} */
@@ -28,7 +28,7 @@ const popOutput = extra.popOutput;
 const printHTML = (html) => { extra.printRaw(React.createElement('div', { style: { margin: 0 }, dangerouslySetInnerHTML: { __html: html } })); };
 
 const root = 'https://githubraw.com/Luna1996/bitburner/master/src/';
-const files = ['goto.js', 'hack.js', 'main.js', 'node.js', 'theme.js', 'tool.js', 'tree.js', 'test.js'];
+const files = ['tool.js', 'goto.js', 'hack.js', 'main.js', 'node.js', 'theme.js', 'tree.js', 'test.js'];
 /** @type {import('../docs').UserInterfaceTheme} */
 const theme = {
   primarylight: '#E0E0BC',
