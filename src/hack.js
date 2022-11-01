@@ -40,50 +40,51 @@ export async function main(ns) {
     switch (phase) {
       case SEEK: if (victim) {
         newPhase = WEAK;
-        printHTML(
-          `<span style='color:${theme.info}'>` +
-          `Find new victim <span style='color:${theme.money}'>${victim}</span>. ` +
-          `Start <span style='color:${theme.money}'>weak</span>.` +
-          `</span>`);
       }
       case WEAK: if (
         ns.getServerSecurityLevel(victim) ==
         ns.getServerMinSecurityLevel(victim)) {
         newPhase = GROW;
-        printHTML(
-          `<span style='color:${theme.info}'>` +
-          `Complete weak <span style='color:${theme.money}'>${victim}</span>. ` +
-          `Start <span style='color:${theme.money}'>grow</span>.` +
-          `</span>`);
       }
       case GROW: if (
         ns.getServerMoneyAvailable(victim) ==
         ns.getServerMaxMoney(victim)) {
         newPhase = HACK;
-        printHTML(
-          `<span style='color:${theme.info}'>` +
-          `Complete grow <span style='color:${theme.money}'>${victim}</span>. ` +
-          `Start <span style='color:${theme.money}'>hack</span>.` +
-          `</span>`);
       }
     }
     if (phase != newPhase) {
       for (const id of ids) ns.kill(id);
       ids = [];
       phase = newPhase;
-      const sdif = ns.getServerSecurityLevel(victim) - ns.getServerMinSecurityLevel(victim);
-      const ones = ns.weakenAnalyze(1);
-      const mdif = ns.getServerMaxMoney(victim) / ns.getServerMoneyAvailable(victim);
       switch (phase) {
-        case WEAK:
-          const wnum = Math.ceil(sdif / oneg);
-          addScript({ name: 'weaker.js', n: wnum, args: [victim], onRun: logId });
+        case WEAK: {
+          const securityNeed = ns.getServerSecurityLevel(victim) - ns.getServerMinSecurityLevel(victim);
+          const weakNeed = Math.ceil(securityNeed / oneg);
+          addScript({ name: 'weaker.js', n: weakNeed, args: [victim], onRun: logId });
+          printHTML(
+            `<span style='color:${theme.info}'>Find new victim `
+            + `<span style='color:${theme.money}'>${victim}</span>. Start `
+            + `<span style='color:${theme.money}'>weaken</span> with `
+            + `<span style='color:${theme.money}'>w:${weakNeed}</span>.` +
+            `</span>`);
           break;
-          case GROW:
-          const gnum = Math.ceil(ns.growthAnalyze(victim, mdif));
+        } case GROW: {
+          const moneyNeed = ns.getServerMaxMoney(victim) / ns.getServerMoneyAvailable(victim);
+          const growNeed = Math.ceil(ns.growthAnalyze(victim, moneyNeed));
+          const securityPerWeak = ns.weakenAnalyze(1);
+          const securtiyPerGrow = ns.growthAnalyzeSecurity(1, victim);
+          const weakNeed = Math.ceil(growNeed * securtiyPerGrow / securityPerWeak);
+          printHTML(
+            `<span style='color:${theme.info}'>Complete weaken `
+            + `<span style='color:${theme.money}'>${victim}</span>. Start `
+            + `<span style='color:${theme.money}'>growth</span> with `
+            + `<span style='color:${theme.money}'>w:${weakNeed} g:${growNeed}</span>.` +
+            `</span>`);
           break;
-        case HACK:
+        } case HACK: {
+          const securityPerHack = ns.hackAnalyzeSecurity(1, victim);
           break;
+        }
       }
     }
     await ns.asleep(1000);

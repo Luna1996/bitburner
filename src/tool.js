@@ -4,8 +4,8 @@ import { theme } from './wget';
  * @typedef {import('../docs').NS} NS
  * @typedef {Object.<string, {last: string, next: string[]}>} Tree
  * @typedef {{r: number, g: number, b: number}} RGB
- * @typedef {{name: string, n?: number, args?: (string|number|boolean)[], onRun: (id: number)=>void}} Script
- * @typedef {{n: number, onRun: (id: number)=>void, group: Object.<string, {n?: number, args?: (string|number|boolean)[]}>}} ScriptGroup
+ * @typedef {{name: string, n?: number, args?: (string|number|boolean)[], onRun?: (id: number)=>void}} Script
+ * @typedef {{n: number, group: Script[]}} ScriptGroup
  */
 
 /** @type {import('./tool').Tree} */
@@ -23,17 +23,7 @@ export function runScript(ns) {
   for (let i = scripts.length - 1; i >= 0; i--) {
     const item = scripts[i];
     if (item.group) {
-      const bags = {};
-      for (const host in hacked)
-        bags[host] = ns.getServerMaxRam(host) - ns.getServerUsedRam(host);
-      const bids = {};
-      for (const [name, { n }] in Object.entries(item.group)) {
-        bids[name] = {
-          size: ns.getScriptRam(name, 'home'),
-          n: n || 1
-        }
-      }
-      const answ = Object.entries(arangeJobs(bags, bids));
+      const answ = fillJobs(item.group);
       if (answ) {
         if (item.n && item.n != 1) {
           item.n -= 1;
@@ -41,17 +31,14 @@ export function runScript(ns) {
         } else {
           scripts.splice(i, 1);
         }
-        for (const [host, list] of answ) {
-          for (const [name, n] of Object.entries(list)) {
-            const args = item.group[name].args
-            const id = ns.exec(name, host, n, ...args);
-            if (item.onRun) item.onRun(id);
-            printHTML(
-              `<span style='color:${theme.secondary}'>[${id}]</span>` +
-              `<span style='color:${theme.info}'>${name.substring(0, -3)}</span>` +
-              `<span style='color:${theme.secondary}'>${args ? ' ' + args.join(' ') : ''}@${host}</span>`
-            );
-          }
+        for (const { svrName: host, script: { name, n, args, onRun } } of answ) {
+          const id = ns.exec(name, host, n, ...args);
+          if (onRun) onRun(id);
+          printHTML(
+            `<span style='color:${theme.secondary}'>[${id}]</span>` +
+            `<span style='color:${theme.info}'>${name.substring(0, -3)}</span>` +
+            `<span style='color:${theme.secondary}'>${n && n != 1 ? n.toString() : ''}${args ? ' ' + args.join(' ') : ''}@${host}</span>`
+          );
         }
       }
     } else {
@@ -87,65 +74,109 @@ export function runScript(ns) {
 }
 
 /** 
- * @param {Object.<string, number>} svrs
- * @param {Object.<string, {jobSize: number, jobLeft: number}>} jobs
- * @return {Object.<string, Object.<string, number>>}
+ * @param {Script[]} scripts
+ * @return {{svrName: string, script: Script}[]}
  */
-function arangeJobs(svrs, jobs) {
-  const SVRS = Object.entries(svrs);
-  const JOBS = Object.entries(jobs);
-  let totalSvrSize = 0;
-  let totalJobSize = 0;
+function fillJobs(scripts) {
+  /** @typedef {{svrName: string, svrRam: number}} Svr */
+  /** @typedef {{jobName: string, jobRam: number, jobLeft: number}} Job */
+  /** @typedef {{jobName: string, jobIndex: number, svrNames: string[], svrIndex: number}} Step */
+
+  /** @type {Svr[]} */
+  const svrList = [];
+  /** @type {Object.<string, Svr>} */
+  const svrMap = {};
+  let totalSvrRam = 0;
+  for (const svrName in hacked) {
+    const svrRam = ns.getServerMaxRam(svrName) - ns.getServerUsedRam(svrName);
+    if (svrRam > 0) {
+      const svr = { svrName, svrRam };
+      svrList.push(svr);
+      svrMap[svrName] = svr;
+      totalSvrRam += svrRam;
+    }
+  }
+
+  /** @type {Job[]} */
+  const jobList = [];
+  /** @type {Object.<string, Job>} */
+  const jobMap = {};
+  /** @type {Object.<string, Script>} */
+  const scriptMap = {};
+  let totalJobRam = 0;
   let totalJobNum = 0;
-  for (const [, svrSize] of SVRS) totalSvrSize += svrSize;
-  for (const [, { jobSize, jobLeft }] of JOBS) { totalJobSize += jobSize * jobLeft; totalJobNum += jobLeft; }
-  if (totalSvrSize < totalJobSize) return;
-  SVRS.sort((a, b) => b[1] - a[1]);
-  JOBS.sort((a, b) => b[1].jobSize - a[1].jobSize);
-  let i = 0;
-  /** @type {{i: number, job: [string, {jobSize: number, jobLeft: number}], possibleSvr: [string, number][]}[]} */
+  for (const script of scripts) {
+    const { name: jobName, n: jobLeft } = script;
+    scriptMap[jobName] = script;
+    const jobRam = ns.getScriptRam(jobName, 'home');
+    const job = { jobName, jobRam, jobLeft }
+    jobList.push(job);
+    jobMap[jobName] = job;
+    totalJobRam += jobRam * jobLeft;
+    totalJobNum += jobLeft;
+  }
+
+  if (totalSvrRam < totalJobRam) return;
+
+  jobList.sort((a, b) => b.jobRam - a.jobRam);
+
+  let jobIndex = 0;
+  /** @type {Step[]} */
   let steps = [];
   while (steps.length < totalJobNum) {
-    let job = JOBS[i];
-    let possibleSvr = [];
-    for (const svr of SVRS) {
-      if (svr[1] >= job[1].jobSize)
-        possibleSvr.push(svr);
-    }
-    if (possibleSvr.length == 0) {
-      let step = steps.pop();
-      while (step) {
-        step.possibleSvr.shift()[1] += step.job[1].jobSize;
-        step.job[1].jobLeft++;
-        if (step.possibleSvr.length != 0) break;
-        step = steps.pop();
+    svrList.sort((a, b) => a.svrRam - b.svrRam);
+    const job = jobList[jobIndex];
+
+    /** @type {string[]} */
+    const svrNames = [];
+    for (const svr of svrList) {
+      if (svr.svrRam >= job.jobRam) {
+        svrNames.push(svr.svrName);
       }
-      if (!step) {
-        // printHTML(`<span style='color:${theme.errordark}'>Fail to arange jobs.</span>`);
-        return;
-      }
-      i = step.i;
-      job = step.job;
-      possibleSvr = step.possibleSvr;
     }
-    steps.push({ i, job, possibleSvr });
-    possibleSvr[0][1] -= job[1].jobSize;
-    job[1].jobLeft--;
-    if (job[1].jobLeft == 0) {
-      i++;
+
+    if (svrNames.length == 0) {
+      do {
+        let step = steps[steps.length - 1];
+        if (!step) { return; }
+        const svr = svrMap[step.svrNames[step.svrIndex]];
+        svr.svrRam += jobMap[step.jobName].jobRam;
+        jobMap[step.jobName].jobLeft++;
+        step.svrIndex--;
+        if (step.svrIndex >= 0) {
+          jobIndex = step.jobIndex;
+          break;
+        }
+        steps.pop();
+      } while (true)
+    } else {
+      const svrIndex = svrNames.length - 1;
+      const svr = svrMap[svrNames[svrIndex]];
+      svr.svrRam -= job.jobRam;
+      job.jobLeft--;
+      if (job.jobLeft == 0) jobIndex++;
+      steps.push({ jobIndex, jobName: job.jobName, svrNames });
     }
   }
 
   /** @type {Object.<string, Object.<string, number>>} */
   const answ = {};
   for (const step of steps) {
-    const svr = step.possibleSvr[0][0];
-    const job = step.job[0];
+    const svr = step.svrNames[0][0];
+    const job = step.jobName[0];
     if (!answ[svr]) answ[svr] = {};
     if (answ[svr][job] == undefined) answ[svr][job] == 1;
     else answ[svr][job]++;
   }
-  return answ;
+
+  /** @type {{svrName: string, script: Script}[]} */
+  const list = [];
+  for (const [svrName, many] of Object.entries(answ)) {
+    for (const [name, n] of Object.entries(many)) {
+      list.push({ svrName, script: { ...jobMap[name], n } })
+    }
+  }
+  return list;
 }
 
 export function hackAll(ns) {
@@ -293,6 +324,19 @@ export function money(n) {
   if (n < 1000) return `$${n}`;
   if (n < 1000000) return `$${n / 1000}k`;
   if (n < 1000000000) return `$${n / 1000000}b`
+}
+
+/**
+ * @param {number} a
+ * @param {number} b
+ */
+export function gcd(a, b) {
+  while (b) {
+    var t = b;
+    b = a % b;
+    a = t;
+  }
+  return a;
 }
 
 /** @type {()=>any[]} */
