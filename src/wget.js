@@ -5,17 +5,20 @@ export async function main(ns) {
   ns.ui.setStyles(style);
 
   for (let file of files) {
-    printHTML(`<span style='color:${theme.secondary}'>Downloading ${file}...</span>`);
-    if (await ns.wget(root + file, file, 'home')) {
-      popOutput();
-      printHTML(`<span style='color:${theme.success}'>Success download ${file}.</span>`);
-    } else {
-      popOutput();
-      printHTML(`<span style='color:${theme.error}'>Fail download ${file}.</span>`);
+    while (true) {
+      printHTML(`<span style='color:${theme.secondary}'>Downloading ${file}...</span>`);
+      if (await ns.wget(root + file, file, 'home')) {
+        popOutput();
+        printHTML(`<span style='color:${theme.success}'>Success download ${file}.</span>`);
+        break;
+      } else {
+        popOutput();
+        printHTML(`<span style='color:${theme.error}'>Fail download ${file}.</span>`);
+      }
     }
   };
 
-  ns.atExit(() => ns.exec('init.jg', 'home'));
+  ns.atExit(() => ns.exec('init.js', 'home'));
 }
 
 /** @type {(str:string)=>void} */
