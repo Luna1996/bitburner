@@ -15,7 +15,7 @@ export async function main(ns) {
     }
   };
 
-  execRaw('run main.js');
+  ns.atExit(() => ns.exec('init.jg'));
 }
 
 /** @type {(str:string)=>void} */

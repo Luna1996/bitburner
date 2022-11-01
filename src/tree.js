@@ -1,4 +1,4 @@
-import { updateTree, money, popOutput, printNode, sudo, tree } from './tool';
+import { updateTree, money, popOutput, printNode, sudo, tree, goto } from './tool';
 import { theme } from './wget';
 
 /** @param {import('./tool').NS} ns */
@@ -20,7 +20,7 @@ export async function main(ns) {
       pref,
       React.createElement('span', {
         style: { color: root ? theme.success : (canRoot ? theme.primary : theme.secondary) },
-        onClick: () => cnct(tree, host)
+        onClick: () => goto(tree, host)
       }, host),
       canRoot && React.createElement('span', { style: { color: theme.secondary } }, ` ${ns.getServerMaxRam(host)}G`),
       hlv < shlv && canRoot && React.createElement('span', { style: { color: theme.error } }, ` Lv.${shlv}`),
