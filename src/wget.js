@@ -28,9 +28,9 @@ const popOutput = extra.popOutput;
 const printHTML = (html) => { extra.printRaw(React.createElement('div', { style: { margin: 0 }, dangerouslySetInnerHTML: { __html: html } })); };
 
 const root = 'https://githubraw.com/Luna1996/bitburner/master/src/';
-const files = ['tool.js', 'goto.js', 'hack.js', 'main.js', 'node.js', 'theme.js', 'tree.js', 'test.js'];
+export const files = ['tool.js', 'goto.js', 'hack.js', 'main.js', 'node.js', 'theme.js', 'tree.js', 'test.js'];
 /** @type {import('../docs').UserInterfaceTheme} */
-const theme = {
+export const theme = {
   primarylight: '#E0E0BC',
   primary: '#CCCCAE',
   primarydark: '#B8B89C',

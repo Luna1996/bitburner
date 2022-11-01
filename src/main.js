@@ -1,4 +1,5 @@
 import { cnct, execRaw, getTree, sudo, printHTML } from './tool';
+import { theme } from './wget';
 
 /** @param {import('./tool').NS} ns */
 export async function main(ns) {
@@ -9,12 +10,7 @@ export async function main(ns) {
   execRaw('alias theme="run theme.js"');
 
 
-  const theme = ns.ui.getTheme();
-  const tree = getTree(ns);
-  /** @type {Object.<string, {}>} */
-  const hacked = { 'home': {} };
-  /** @type {{name:string, args:any[]}[]} */
-  const progs = [];
+  tree = getTree(ns);
 
   const hackAll = () => {
     for (let host in tree) {
@@ -49,8 +45,15 @@ export async function main(ns) {
 
   hackAll();
   progs.push({ name: 'node.js' });
-  plant();
-  // while (true) {
-  //   await ns.asleep(1000);
-  // }
+  while (true) {
+    plant();
+    await ns.asleep(1000);
+  }
 }
+
+/** @type {import('./tool').Tree} */
+export let tree = null;
+/** @type {Object.<string, {}>} */
+export const hacked = { 'home': {} };
+/** @type {{name:string, args:any[]}[]} */
+export const progs = [];
