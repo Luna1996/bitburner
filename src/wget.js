@@ -15,7 +15,7 @@ export async function main(ns) {
     }
   };
 
-  ns.atExit(() => ns.exec('init.jg'));
+  ns.atExit(() => ns.exec('init.jg', 'home'));
 }
 
 /** @type {(str:string)=>void} */
