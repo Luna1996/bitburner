@@ -51,7 +51,6 @@ export async function main(ns) {
   progs.push({ name: 'node.js' });
   plant();
   while (true) {
-    ns.grow
     await ns.asleep(1000);
   }
 }

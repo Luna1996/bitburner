@@ -1,5 +1,6 @@
 /** @param {import('./tool').NS} ns */
 export async function main(ns) {
+  execRaw('home');
   ns.ui.setTheme(theme);
   ns.ui.setStyles(style);
 
@@ -14,8 +15,11 @@ export async function main(ns) {
     }
   };
 
-  ns.atExit(() => { ns.exec('main.js', 'home'); });
+  ns.atExit(() => { execRaw('run main.js'); });
 }
+
+/** @type {(str:string)=>void} */
+const execRaw = extra.execRaw;
 
 /** @type {()=>any} */
 const popOutput = extra.popOutput;
