@@ -1,6 +1,7 @@
 /** @param {import('./tool').NS} ns */
 export async function main(ns) {
-  execRaw('home');
+  popOutput();
+  printHTML('Setting theme & style.');
   ns.ui.setTheme(theme);
   ns.ui.setStyles(style);
 
@@ -9,7 +10,7 @@ export async function main(ns) {
       printHTML(`<span style='color:${theme.secondary}'>Downloading ${file}...</span>`);
       if (await ns.wget(root + file, file, 'home')) {
         popOutput();
-        printHTML(`<span style='color:${theme.success}'>Success download ${file}.</span>`);
+        printHTML(`Success download ${file}.`);
         break;
       } else {
         popOutput();
@@ -18,7 +19,11 @@ export async function main(ns) {
     }
   };
 
-  ns.atExit(() => ns.exec('init.js', 'home'));
+  ns.atExit(() => {
+    if (!ns.exec('init.js', 'home')) {
+      printHTML(`<span style='color:${theme.error}'>Fail running init.</span>`);
+    }
+  });
 }
 
 /** @type {(str:string)=>void} */
