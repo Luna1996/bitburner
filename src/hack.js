@@ -93,7 +93,7 @@ export async function main(ns) {
             `<span style='color:${theme.info}'>Complete weaken `
             + `<span style='color:${theme.money}'>${victim}</span>, start `
             + `<span style='color:${theme.money}'>growth</span> with `
-            + `<span style='color:${theme.money}'>(w:${weakPerGroup} g:${growPerGroup}):${n}</span>;\nCurrent money: `
+            + `<span style='color:${theme.money}'>(g:${growPerGroup} w:${weakPerGroup}):${n}</span>;\nCurrent money: `
             + `<span style='color:${theme.money}'>${money(currentMoney)}</span>, maximal money: `
             + `<span style='color:${theme.money}'>${money(maxMoney)}</span>;` +
             `</span>`);
@@ -105,21 +105,25 @@ export async function main(ns) {
           const percentPerHack = ns.hackAnalyze(victim);
           const growNeed = Math.ceil(ns.growthAnalyze(victim, 1 / (1 - percentPerHack), 1));
           const weakNeed = Math.ceil((securityPerHack + growNeed * securtiyPerGrow) / securityPerWeak);
+          const hackTime = ns.getHackTime(victim);
+          const growTime = ns.getGrowTime(victim);
+          const weakTime = ns.getWeakenTime(victim);
           // const n = Math.ceil((growNeed + weakNeed + 1) / 46);
           // const weakPerGroup = Math.ceil(weakNeed / n);
           // const growPerGroup = Math.ceil(growNeed / n);
           addScript({
+            n: Infinity,
             group: [
-              { name: 'hacker.js', n: 1, args: [victim], onRun: logId },
-              { name: 'grower.js', n: growNeed, args: [victim], onRun: logId },
-              { name: 'weaker.js', n: weakNeed, args: [victim], onRun: logId },
+              { name: 'hacker.js', n: 1, args: [victim, weakTime - hackTime + 1000], onRun: logId },
+              { name: 'grower.js', n: growNeed, args: [victim, weakTime - growTime + 1000], onRun: logId },
+              { name: 'weaker.js', n: weakNeed, args: [victim, 1000], onRun: logId },
             ]
           });
           printHTML(
             `<span style='color:${theme.info}'>Complete weaken `
             + `<span style='color:${theme.money}'>${victim}</span>, start `
             + `<span style='color:${theme.money}'>hacking</span> with `
-            + `<span style='color:${theme.money}'>h: 1, w:${weakNeed} g:${growNeed}</span>;` +
+            + `<span style='color:${theme.money}'>h: 1 g:${growNeed} w:${weakNeed}</span>;` +
             `</span>`);
           break;
         }

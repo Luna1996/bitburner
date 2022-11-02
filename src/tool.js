@@ -36,15 +36,15 @@ export function runScript(ns) {
     if (item.group) {
       const answ = fillJobs(ns, item.group);
       if (answ) {
-        if (item.n && item.n != 1) {
-          item.n -= 1;
+        item.n--;
+        if (item.n > 0) {
           i++;
         } else {
           extra.scripts.splice(i, 1);
         }
         for (const { svrName: host, script: { name, n, args, onRun } } of answ) {
           const id = ns.exec(name, host, n, `${time}@${step++}`, ...(args ?? []));
-          if (id == 0) { ns.tail(); ns.exit(); return; }
+          if (id == 0) { ns.tail(); }
           if (onRun) onRun(id);
           printHTML(
             `<span style='color:${theme.secondary}'>`
