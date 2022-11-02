@@ -1,4 +1,4 @@
-import { addScript, printHTML } from './tool';
+import { addScript, gcd, printHTML } from './tool';
 
 /** @typedef {SEEK|WEAK|GROW|HACK} Phase */
 
@@ -75,11 +75,18 @@ export async function main(ns) {
           const securityPerWeak = ns.weakenAnalyze(1);
           const securtiyPerGrow = ns.growthAnalyzeSecurity(1, victim);
           const weakNeed = Math.ceil(growNeed * securtiyPerGrow / securityPerWeak);
+          const n = gcd(weakNeed, growNeed);
+          addScript({
+            n, group: [
+              { name: 'weaker.js', n: weakNeed / n, args: [victim], onRun: logId },
+              { name: 'grower.js', n: growNeed / n, args: [victim], onRun: logId },
+            ]
+          });
           printHTML(
             `<span style='color:${theme.info}'>Complete weaken `
             + `<span style='color:${theme.money}'>${victim}</span>. Start `
             + `<span style='color:${theme.money}'>growth</span> with `
-            + `<span style='color:${theme.money}'>w:${weakNeed} g:${growNeed}</span>.` +
+            + `<span style='color:${theme.money}'>(w:${weakNeed/n} g:${growNeed/n}):${n}</span>.` +
             `</span>`);
           break;
         } case HACK: {
