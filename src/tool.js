@@ -1,5 +1,3 @@
-import { theme } from './init1';
-
 /**
  * @typedef {import('../docs').NS} NS
  * @typedef {Object.<string, {last: string, next: string[]}>} Tree
@@ -8,18 +6,19 @@ import { theme } from './init1';
  * @typedef {{n: number, group: Script[]}} ScriptGroup
  */
 
-/** @type {import('./tool').Tree} */
-extra.tree = null
+/** @type {Tree} */
+extra.tree;
 /** @type {Object.<string, {}>} */
-extra.hacked = { 'home': {} };
+extra.hacked;
 /** @type {(Script|ScriptGroup)[]} */
-extra.scripts = [];
+extra.scripts;
 
 /** @param {Script[]|ScriptGroup[]} script */
 export function addScript(...script) { extra.scripts.push(...script); }
 
 /** @param {NS} ns */
 export function runScript(ns) {
+  const theme = ns.ui.getTheme();
   for (let i = extra.scripts.length - 1; i >= 0; i--) {
     const item = extra.scripts[i];
     if (item.group) {
@@ -234,6 +233,7 @@ export function updateTree(ns) {
 
 export function goto(host) {
   let cmd = '';
+  console.log(extra.tree);
   while (host != 'home') {
     cmd = `connect ${host};${cmd}`;
     host = extra.tree[host].last;
@@ -243,6 +243,7 @@ export function goto(host) {
 
 /** @param {NS} ns */
 export function hackAll(ns) {
+  const theme = ns.ui.getTheme();
   for (let host in extra.tree) {
     if (extra.hacked[host]) continue;
     if (ns.hasRootAccess(host)) {
@@ -291,6 +292,7 @@ export function sudo(ns, host, act = true) {
  * @return {boolean}
  */
 export function tryUpgradeHacknetNode(ns) {
+  const theme = ns.ui.getTheme();
   const hn = ns.hacknet;
   let money = ns.getServerMoneyAvailable('home');
   let num_node = hn.numNodes();
