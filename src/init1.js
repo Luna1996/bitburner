@@ -40,7 +40,7 @@ const popOutput = extra.popOutput;
 const printHTML = (html) => { extra.printRaw(React.createElement('div', { style: { margin: 0 }, dangerouslySetInnerHTML: { __html: html } })); };
 
 const root = 'https://githubraw.com/Luna1996/bitburner/master/src/';
-export const files = ['tool.js', 'init2.js', 'init3.js', 'main.js', 'node.js', 'hack.js', 'theme.js', 'tree.js', 'goto.js', 'test.js', 'weaker.js'];
+export const files = ['tool.js', 'init2.js', 'init3.js', 'main.js', 'node.js', 'hack.js', 'theme.js', 'tree.js', 'goto.js', 'test.js', 'weaker.js', 'grower.js'];
 /** @type {import('../docs').UserInterfaceTheme} */
 export const theme = {
   primarylight: '#E0E0BC',
