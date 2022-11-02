@@ -20,7 +20,7 @@ export async function main(ns) {
       pref,
       React.createElement('span', {
         style: { color: root ? theme.success : (canRoot ? theme.primary : theme.secondary) },
-        onClick: () => goto(extra.tree, host)
+        onClick: () => goto(host)
       }, host),
       canRoot && React.createElement('span', { style: { color: theme.secondary } }, ` ${ns.getServerMaxRam(host)}G`),
       hlv < shlv && canRoot && React.createElement('span', { style: { color: theme.error } }, ` Lv.${shlv}`),

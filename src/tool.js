@@ -152,19 +152,17 @@ function fillJobs(ns, scripts) {
       do {
         let step = steps[steps.length - 1];
         if (!step) { return; }
-        const svr = svrMap[step.svrNames[step.svrIndex]];
-        svr.svrRam += jobMap[step.jobName].jobRam;
-        jobMap[step.jobName].jobLeft++;
+        const job = jobMap[step.jobName]
+        svrMap[step.svrNames[step.svrIndex]].svrRam += job.jobRam;
         step.svrIndex--;
         if (step.svrIndex >= 0) {
           jobIndex = step.jobIndex;
+          svrMap[step.svrNames[step.svrIndex]].svrRam -= job.jobRam;
           break;
         }
+        job.jobLeft++;
         steps.pop();
       } while (true)
-      console.log('回溯');
-      console.log(svrList);
-      console.log(steps);
     } else {
       const svrIndex = svrNames.length - 1;
       const svr = svrMap[svrNames[svrIndex]];
@@ -172,9 +170,6 @@ function fillJobs(ns, scripts) {
       job.jobLeft--;
       if (job.jobLeft == 0) jobIndex++;
       steps.push({ jobIndex, jobName: job.jobName, svrNames, svrIndex });
-      console.log('前进');
-      console.log(svrList);
-      console.log(steps);
     }
   }
 
@@ -183,6 +178,8 @@ function fillJobs(ns, scripts) {
   for (const step of steps) {
     const svrName = step.svrNames[step.svrIndex];
     const jobName = step.jobName;
+    const svr = svrMap[svrName];
+    svr.svrRam -= jobMap[jobName].jobRam;
     if (!answ[svrName]) answ[svrName] = {};
     if (!answ[svrName][jobName]) answ[svrName][jobName] = 1;
     else answ[svrName][jobName]++;
@@ -253,7 +250,6 @@ export function updateTree(ns) {
 
 export function goto(host) {
   let cmd = '';
-  console.log(extra.tree);
   while (host != 'home') {
     cmd = `connect ${host};${cmd}`;
     host = extra.tree[host].last;

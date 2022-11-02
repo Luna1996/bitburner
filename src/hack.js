@@ -85,20 +85,22 @@ export async function main(ns) {
           const growNeed = Math.ceil(ns.growthAnalyze(victim, maxMoney / currentMoney));
           const securityPerWeak = ns.weakenAnalyze(1);
           const securtiyPerGrow = ns.growthAnalyzeSecurity(1, victim, 1);
-          const weakPerGroup = Math.ceil(securtiyPerGrow / securityPerWeak);
+          const growPerGroup = Math.ceil(securityPerWeak / securtiyPerGrow);
           const growTime = ns.getGrowTime(victim);
           const weakTime = ns.getWeakenTime(victim);
+          const n = Math.ceil(growNeed / growPerGroup);
           addScript({
-            n: growNeed, group: [
-              { name: 'grower.js', n: 1, args: [victim, weakTime - growTime + 500], onRun: logId },
-              { name: 'weaker.js', n: weakPerGroup, args: [victim, 500], onRun: logId },
+            n,
+            group: [
+              { name: 'grower.js', n: growPerGroup, args: [victim, weakTime - growTime + 500], onRun: logId },
+              { name: 'weaker.js', n: 1, args: [victim, 500], onRun: logId },
             ]
           });
           printHTML(
             `<span style='color:${theme.info}'>Complete weaken `
             + `<span style='color:${theme.money}'>${victim}</span>, start `
             + `<span style='color:${theme.money}'>growth</span> with `
-            + `<span style='color:${theme.money}'>(g:1 w:${weakPerGroup}):${growNeed}</span>;\nCurrent money: `
+            + `<span style='color:${theme.money}'>(g:${growPerGroup} w:1):${n}</span>;\nCurrent money: `
             + `<span style='color:${theme.money}'>${money(currentMoney)}</span>, maximal money: `
             + `<span style='color:${theme.money}'>${money(maxMoney)}</span>;` +
             `</span>`);
