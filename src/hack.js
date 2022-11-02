@@ -85,7 +85,7 @@ export async function main(ns) {
           const growNeed = Math.ceil(ns.growthAnalyze(victim, maxMoney / currentMoney));
           const securityPerWeak = ns.weakenAnalyze(1);
           const securtiyPerGrow = ns.growthAnalyzeSecurity(1, victim, 1);
-          const growPerGroup = Math.ceil(securityPerWeak / securtiyPerGrow);
+          const growPerGroup = Math.floor(securityPerWeak / securtiyPerGrow);
           const growTime = ns.getGrowTime(victim);
           const weakTime = ns.getWeakenTime(victim);
           const n = Math.ceil(growNeed / growPerGroup);
