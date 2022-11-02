@@ -1,8 +1,15 @@
-import { printHTML } from './tool';
+import { addScript, hackAll, money, printHTML, runScript, updateTree } from './tool';
 
 /** @param {import('./tool').NS} ns */
 export async function main(ns) {
-  printHTML(`${4.3%2.1}`);
-  ns.exec('test2.js', 'home');
-  printHTML(`${ns.getServerUsedRam('home')}`);
+  updateTree(ns);
+  hackAll(ns);
+  extra.scripts = [];
+  addScript({
+    n: 1, group: [
+      { name: 'weaker.js', n: 1, args: ['n00dles'] },
+      { name: 'grower.js', n: 2, args: ['n00dles'] },
+    ]
+  });
+  runScript(ns);
 }

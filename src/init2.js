@@ -6,7 +6,6 @@ export async function main(ns) {
   extra.tree = null;
   extra.hacked = { 'home': {} };
   extra.scripts = [];
-
   updateTree(ns);
   ns.atExit(() => execRaw('home;run init3.js;'));
 }

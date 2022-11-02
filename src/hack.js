@@ -1,4 +1,4 @@
-import { addScript, gcd, printHTML } from './tool';
+import { addScript, gcd, hackAll, money, printHTML } from './tool';
 
 /** @typedef {SEEK|WEAK|GROW|HACK} Phase */
 
@@ -22,6 +22,7 @@ export async function main(ns) {
   function logId(id) { ids.push(id); }
 
   while (true) {
+    hackAll(ns);
     const hackingLevel = ns.getHackingLevel();
     newVictim = {};
     for (const host in extra.hacked) {
@@ -44,7 +45,7 @@ export async function main(ns) {
       case WEAK: if (
         ns.getServerSecurityLevel(victim) ==
         ns.getServerMinSecurityLevel(victim)) {
-        newPhase = GROW;
+        newPhase = HACK;
       }
       case GROW: if (
         ns.getServerMoneyAvailable(victim) ==
@@ -58,39 +59,68 @@ export async function main(ns) {
       phase = newPhase;
       switch (phase) {
         case WEAK: {
-          const securityNeed = ns.getServerSecurityLevel(victim) - ns.getServerMinSecurityLevel(victim);
+          const currentSecurity = ns.getServerSecurityLevel(victim);
+          const minSecurity = ns.getServerMinSecurityLevel(victim);
           const securityPerWeak = ns.weakenAnalyze(1);
-          const weakNeed = Math.ceil(securityNeed / securityPerWeak);
+          const weakNeed = Math.ceil((currentSecurity - minSecurity) / securityPerWeak);
           addScript({ name: 'weaker.js', n: weakNeed, args: [victim], onRun: logId });
           printHTML(
             `<span style='color:${theme.info}'>Find new victim `
-            + `<span style='color:${theme.money}'>${victim}</span>. Start `
+            + `<span style='color:${theme.money}'>${victim}</span>, start `
             + `<span style='color:${theme.money}'>weaken</span> with `
-            + `<span style='color:${theme.money}'>w:${weakNeed}</span>.` +
+            + `<span style='color:${theme.money}'>w:${weakNeed}</span>;\nCurrent security: `
+            + `<span style='color:${theme.money}'>${currentSecurity}</span>, minimal security: `
+            + `<span style='color:${theme.money}'>${minSecurity}</span>;` +
             `</span>`);
           break;
         } case GROW: {
-          const moneyNeed = ns.getServerMaxMoney(victim) / ns.getServerMoneyAvailable(victim);
-          const growNeed = Math.ceil(ns.growthAnalyze(victim, moneyNeed));
+          const currentMoney = ns.getServerMoneyAvailable(victim);
+          const maxMoney = ns.getServerMaxMoney(victim);
+          const growNeed = Math.ceil(ns.growthAnalyze(victim, maxMoney / currentMoney));
           const securityPerWeak = ns.weakenAnalyze(1);
-          const securtiyPerGrow = ns.growthAnalyzeSecurity(1, victim);
+          const securtiyPerGrow = ns.growthAnalyzeSecurity(1, victim, 1);
           const weakNeed = Math.ceil(growNeed * securtiyPerGrow / securityPerWeak);
-          const n = gcd(weakNeed, growNeed);
+          const n = Math.ceil((growNeed + weakNeed) / 46);
+          const weakPerGroup = Math.ceil(weakNeed / n);
+          const growPerGroup = Math.ceil(growNeed / n);
           addScript({
             n, group: [
-              { name: 'weaker.js', n: weakNeed / n, args: [victim], onRun: logId },
-              { name: 'grower.js', n: growNeed / n, args: [victim], onRun: logId },
+              { name: 'grower.js', n: growPerGroup, args: [victim], onRun: logId },
+              { name: 'weaker.js', n: weakPerGroup, args: [victim], onRun: logId },
             ]
           });
           printHTML(
             `<span style='color:${theme.info}'>Complete weaken `
-            + `<span style='color:${theme.money}'>${victim}</span>. Start `
+            + `<span style='color:${theme.money}'>${victim}</span>, start `
             + `<span style='color:${theme.money}'>growth</span> with `
-            + `<span style='color:${theme.money}'>(w:${weakNeed/n} g:${growNeed/n}):${n}</span>.` +
+            + `<span style='color:${theme.money}'>(w:${weakPerGroup} g:${growPerGroup}):${n}</span>;\nCurrent money: `
+            + `<span style='color:${theme.money}'>${money(currentMoney)}</span>, maximal money: `
+            + `<span style='color:${theme.money}'>${money(maxMoney)}</span>;` +
             `</span>`);
           break;
         } case HACK: {
           const securityPerHack = ns.hackAnalyzeSecurity(1, victim);
+          const securityPerWeak = ns.weakenAnalyze(1);
+          const securtiyPerGrow = ns.growthAnalyzeSecurity(1, victim, 1);
+          const percentPerHack = ns.hackAnalyze(victim);
+          const growNeed = Math.ceil(ns.growthAnalyze(victim, 1 / (1 - percentPerHack), 1));
+          const weakNeed = Math.ceil((securityPerHack + growNeed * securtiyPerGrow) / securityPerWeak);
+          // const n = Math.ceil((growNeed + weakNeed + 1) / 46);
+          // const weakPerGroup = Math.ceil(weakNeed / n);
+          // const growPerGroup = Math.ceil(growNeed / n);
+          addScript({
+            group: [
+              { name: 'hacker.js', n: 1, args: [victim], onRun: logId },
+              { name: 'grower.js', n: growNeed, args: [victim], onRun: logId },
+              { name: 'weaker.js', n: weakNeed, args: [victim], onRun: logId },
+            ]
+          });
+          printHTML(
+            `<span style='color:${theme.info}'>Complete weaken `
+            + `<span style='color:${theme.money}'>${victim}</span>, start `
+            + `<span style='color:${theme.money}'>hacking</span> with `
+            + `<span style='color:${theme.money}'>h: 1, w:${weakNeed} g:${growNeed}</span>;` +
+            `</span>`);
           break;
         }
       }

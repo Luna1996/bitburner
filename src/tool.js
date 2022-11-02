@@ -7,11 +7,11 @@
  */
 
 /** @type {Tree} */
-extra.tree;
+extra.tree = extra.tree ?? null;
 /** @type {Object.<string, {}>} */
-extra.hacked;
+extra.hacked = extra.hacked ?? { 'home': {} };
 /** @type {(Script|ScriptGroup)[]} */
-extra.scripts;
+extra.scripts = extra.scripts ?? [];
 
 /** @param {Script[]|ScriptGroup[]} list */
 export function addScript(...list) {
@@ -34,7 +34,7 @@ export function runScript(ns) {
   for (let i = extra.scripts.length - 1; i >= 0; i--) {
     const item = extra.scripts[i];
     if (item.group) {
-      const answ = fillJobs(item.group);
+      const answ = fillJobs(ns, item.group);
       if (answ) {
         if (item.n && item.n != 1) {
           item.n -= 1;
@@ -44,6 +44,7 @@ export function runScript(ns) {
         }
         for (const { svrName: host, script: { name, n, args, onRun } } of answ) {
           const id = ns.exec(name, host, n, `${time}@${step++}`, ...(args ?? []));
+          if (id == 0) { ns.tail(); ns.exit(); return; }
           if (onRun) onRun(id);
           printHTML(
             `<span style='color:${theme.secondary}'>`
@@ -85,10 +86,11 @@ export function runScript(ns) {
 }
 
 /** 
+ * @param {NS} ns
  * @param {Script[]} scripts
  * @return {{svrName: string, script: Script}[]}
  */
-function fillJobs(scripts) {
+function fillJobs(ns, scripts) {
   /** @typedef {{svrName: string, svrRam: number}} Svr */
   /** @typedef {{jobName: string, jobRam: number, jobLeft: number}} Job */
   /** @typedef {{jobName: string, jobIndex: number, svrNames: string[], svrIndex: number}} Step */
@@ -127,7 +129,7 @@ function fillJobs(scripts) {
     totalJobNum += jobLeft;
   }
 
-  if (totalSvrRam < totalJobRam) return;
+  if (totalSvrRam < totalJobRam) { return; }
 
   jobList.sort((a, b) => b.jobRam - a.jobRam);
 
@@ -135,11 +137,11 @@ function fillJobs(scripts) {
   /** @type {Step[]} */
   let steps = [];
   while (steps.length < totalJobNum) {
-    svrList.sort((a, b) => a.svrRam - b.svrRam);
     const job = jobList[jobIndex];
 
     /** @type {string[]} */
     const svrNames = [];
+    svrList.sort((a, b) => a.svrRam - b.svrRam);
     for (const svr of svrList) {
       if (svr.svrRam >= job.jobRam) {
         svrNames.push(svr.svrName);
@@ -160,31 +162,37 @@ function fillJobs(scripts) {
         }
         steps.pop();
       } while (true)
+      console.log('回溯');
+      console.log(svrList);
+      console.log(steps);
     } else {
       const svrIndex = svrNames.length - 1;
       const svr = svrMap[svrNames[svrIndex]];
       svr.svrRam -= job.jobRam;
       job.jobLeft--;
       if (job.jobLeft == 0) jobIndex++;
-      steps.push({ jobIndex, jobName: job.jobName, svrNames });
+      steps.push({ jobIndex, jobName: job.jobName, svrNames, svrIndex });
+      console.log('前进');
+      console.log(svrList);
+      console.log(steps);
     }
   }
 
   /** @type {Object.<string, Object.<string, number>>} */
   const answ = {};
   for (const step of steps) {
-    const svr = step.svrNames[0][0];
-    const job = step.jobName[0];
-    if (!answ[svr]) answ[svr] = {};
-    if (answ[svr][job] == undefined) answ[svr][job] == 1;
-    else answ[svr][job]++;
+    const svrName = step.svrNames[step.svrIndex];
+    const jobName = step.jobName;
+    if (!answ[svrName]) answ[svrName] = {};
+    if (!answ[svrName][jobName]) answ[svrName][jobName] = 1;
+    else answ[svrName][jobName]++;
   }
 
   /** @type {{svrName: string, script: Script}[]} */
   const list = [];
   for (const [svrName, many] of Object.entries(answ)) {
     for (const [name, n] of Object.entries(many)) {
-      list.push({ svrName, script: { ...jobMap[name], n } })
+      list.push({ svrName, script: { ...scriptMap[name], n } })
     }
   }
   return list;
@@ -257,6 +265,7 @@ export function goto(host) {
 export function hackAll(ns) {
   const theme = ns.ui.getTheme();
   for (let host in extra.tree) {
+    ns.scp(ns.ls('home', '.js'), host, 'home');
     if (extra.hacked[host]) continue;
     if (ns.hasRootAccess(host)) {
       extra.hacked[host] = {};
@@ -292,10 +301,7 @@ export function sudo(ns, host, act = true) {
       }
     }
   }
-  if (act) {
-    ns.nuke(host);
-    ns.scp(ns.ls('home', '.js'), host, 'home');
-  }
+  if (act) { ns.nuke(host); }
   return true;
 }
 
@@ -310,23 +316,23 @@ export function tryUpgradeHacknetNode(ns) {
   let num_node = hn.numNodes();
   if (money >= hn.getPurchaseNodeCost()) {
     hn.purchaseNode();
-    printHTML(`<span style='color:${theme.money}'>+ node${num_node}</span>`);
+    // printHTML(`<span style='color:${theme.money}'>+ node${num_node}</span>`);
     return true;
   }
   for (let i = 0; i < num_node; i++) {
     if (money >= hn.getLevelUpgradeCost(i, 1)) {
       hn.upgradeLevel(i, 1);
-      printHTML(`<span style='color:${theme.money}'>↑ node${num_node} level</span>`);
+      // printHTML(`<span style='color:${theme.money}'>↑ node${num_node} level</span>`);
       return true;
     }
     if (money >= hn.getRamUpgradeCost(i, 1)) {
       hn.upgradeRam(i, 1);
-      printHTML(`<span style='color:${theme.money}'>↑ node${num_node} ram</span>`);
+      // printHTML(`<span style='color:${theme.money}'>↑ node${num_node} ram</span>`);
       return true;
     }
     if (money >= hn.getCoreUpgradeCost(i, 1)) {
       hn.upgradeCore(i, 1);
-      printHTML(`<span style='color:${theme.money}'>↑ node${num_node} core</span>`);
+      // printHTML(`<span style='color:${theme.money}'>↑ node${num_node} core</span>`);
       return true;
     }
   }
@@ -335,12 +341,13 @@ export function tryUpgradeHacknetNode(ns) {
 
 /**
  * @param {number} n
- * @return {str}
+ * @return {string}
  */
 export function money(n) {
   if (n < 1000) return `$${n}`;
   if (n < 1000000) return `$${n / 1000}k`;
   if (n < 1000000000) return `$${n / 1000000}b`
+  return n.toString();
 }
 
 /**
