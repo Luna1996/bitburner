@@ -1,7 +1,8 @@
+import { printHTML } from './tool';
+
 /** @param {import('./tool').NS} ns */
-
-export let fuck;
-
 export async function main(ns) {
-  fuck = 'fuck you'
+  printHTML(`${4.3%2.1}`);
+  ns.exec('test2.js', 'home');
+  printHTML(`${ns.getServerUsedRam('home')}`);
 }

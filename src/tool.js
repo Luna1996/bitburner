@@ -13,11 +13,23 @@ extra.hacked;
 /** @type {(Script|ScriptGroup)[]} */
 extra.scripts;
 
-/** @param {Script[]|ScriptGroup[]} script */
-export function addScript(...script) { extra.scripts.push(...script); }
+/** @param {Script[]|ScriptGroup[]} list */
+export function addScript(...list) {
+  for (const item of list) {
+    item.n = item.n ?? 1;
+    if (item.group) {
+      for (const one of item.group) {
+        one.n = one.n ?? 1;
+      }
+    }
+  }
+  extra.scripts.push(...list);
+}
 
 /** @param {NS} ns */
 export function runScript(ns) {
+  const time = new Date().getTime();
+  let step = 0;
   const theme = ns.ui.getTheme();
   for (let i = extra.scripts.length - 1; i >= 0; i--) {
     const item = extra.scripts[i];
@@ -31,42 +43,42 @@ export function runScript(ns) {
           extra.scripts.splice(i, 1);
         }
         for (const { svrName: host, script: { name, n, args, onRun } } of answ) {
-          const id = ns.exec(name, host, n, ...(args ?? []));
+          const id = ns.exec(name, host, n, `${time}@${step++}`, ...(args ?? []));
           if (onRun) onRun(id);
           printHTML(
-            `<span style='color:${theme.secondary}'>[${id}]</span>` +
-            `<span style='color:${theme.info}'>${name.substring(0, -3)}</span>` +
-            `<span style='color:${theme.secondary}'>${n && n != 1 ? n.toString() : ''}${args ? ' ' + args.join(' ') : ''}@${host}</span>`
-          );
+            `<span style='color:${theme.secondary}'>`
+            + `[${id}] `
+            + `${name}`
+            + `${n && n != 1 ? ` ${n}` : ''}`
+            + `${args ? ' ' + args.join(' ') : ''} `
+            + `@${host}` +
+            `</span>`);
         }
       }
     } else {
+      /** @type {Script} */
       const script = item;
       const name = script.name;
       const args = script.args;
-      const mem = ns.getScriptRam(name, 'home');
-      /** @type {{name: string, left: number}} */
-      let target;
+      const ram = ns.getScriptRam(name, 'home');
       for (const host in extra.hacked) {
-        const ramLeft = ns.getServerMaxRam(host) - ns.getServerUsedRam(host) - mem;
-        if (ramLeft >= 0 && (!target || ramLeft < target.left)) {
-          target = { name: host, left: ramLeft };
+        const ramLeft = ns.getServerMaxRam(host) - ns.getServerUsedRam(host);
+        if (ramLeft >= ram) {
+          const n = Math.min(script.n, Math.floor(ramLeft / ram));
+          const id = ns.exec(name, host, n, `${time}@${step++}`, ...(args ?? []));
+          if (id == 0) { break; }
+          if (script.onRun) { script.onRun(id); }
+          printHTML(
+            `<span style='color:${theme.secondary}'>`
+            + `[${id}] `
+            + `${name}`
+            + `${n && n != 1 ? ` ${n}` : ''}`
+            + `${args ? ' ' + args.join(' ') : ''} `
+            + `@${host}` +
+            `</span>`);
+          script.n -= n;
+          if (script.n == 0) { extra.scripts.splice(i, 1); break; }
         }
-      }
-      if (target) {
-        if (script.n && script.n != 1) {
-          script.n -= 1;
-          i++;
-        } else {
-          extra.scripts.splice(i, 1);
-        }
-        const id = ns.exec(name, target.name, 1, ...(args ?? []));
-        if (script.onRun) script.onRun(id);
-        printHTML(
-          `<span style='color:${theme.secondary}'>[${id}]</span>` +
-          `<span style='color:${theme.info}'>${name.substring(0, -3)}</span>` +
-          `<span style='color:${theme.secondary}'>${args ? ' ' + args.join(' ') : ''}@${target.name}</span>`
-        );
       }
     }
   }

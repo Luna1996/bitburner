@@ -27,7 +27,7 @@ export async function main(ns) {
       }
     }
   };
-  execRaw('home;run init2.js;');
+  ns.atExit(() => execRaw('home;run init2.js;'));
 }
 
 /** @type {(str:string)=>void} */
@@ -78,4 +78,4 @@ export const theme = {
   button: '#333'
 };
 /** @type {import('../docs').IStyleSettings} */
-const style = { fontFamily: 'Consolas', lineHeight: 1.2 };
+export const style = { fontFamily: 'Consolas', lineHeight: 1.2 };
