@@ -27,7 +27,13 @@ export async function main(ns) {
     newVictim = {};
     for (const host in extra.hacked) {
       if (host == 'home' || ns.getServerRequiredHackingLevel(host) > hackingLevel) { continue; }
-      const profit = ns.hackAnalyze(host) * ns.getServerMaxMoney(host) / ns.getHackTime(host);
+      const securityPerHack = ns.hackAnalyzeSecurity(1, host);
+      const securityPerWeak = ns.weakenAnalyze(1);
+      const securtiyPerGrow = ns.growthAnalyzeSecurity(1, host, 1);
+      const percentPerHack = ns.hackAnalyze(host);
+      const growNeed = Math.ceil(ns.growthAnalyze(host, 1 / (1 - percentPerHack), 1));
+      const weakNeed = Math.ceil((securityPerHack + growNeed * securtiyPerGrow) / securityPerWeak);
+      const profit = percentPerHack * ns.getServerMaxMoney(host) / ns.getWeakenTime(host) / (1 + growNeed + weakNeed);
       if (!newVictim.name || newVictim.profit < profit) {
         newVictim.name = host;
         newVictim.profit = profit;
@@ -45,7 +51,7 @@ export async function main(ns) {
       case WEAK: if (
         ns.getServerSecurityLevel(victim) ==
         ns.getServerMinSecurityLevel(victim)) {
-        newPhase = HACK;
+        newPhase = GROW;
       }
       case GROW: if (
         ns.getServerMoneyAvailable(victim) ==
@@ -79,21 +85,20 @@ export async function main(ns) {
           const growNeed = Math.ceil(ns.growthAnalyze(victim, maxMoney / currentMoney));
           const securityPerWeak = ns.weakenAnalyze(1);
           const securtiyPerGrow = ns.growthAnalyzeSecurity(1, victim, 1);
-          const weakNeed = Math.ceil(growNeed * securtiyPerGrow / securityPerWeak);
-          const n = Math.ceil((growNeed + weakNeed) / 46);
-          const weakPerGroup = Math.ceil(weakNeed / n);
-          const growPerGroup = Math.ceil(growNeed / n);
+          const weakPerGroup = Math.ceil(securtiyPerGrow / securityPerWeak);
+          const growTime = ns.getGrowTime(victim);
+          const weakTime = ns.getWeakenTime(victim);
           addScript({
-            n, group: [
-              { name: 'grower.js', n: growPerGroup, args: [victim], onRun: logId },
-              { name: 'weaker.js', n: weakPerGroup, args: [victim], onRun: logId },
+            n: growNeed, group: [
+              { name: 'grower.js', n: 1, args: [victim, weakTime - growTime + 500], onRun: logId },
+              { name: 'weaker.js', n: weakPerGroup, args: [victim, 500], onRun: logId },
             ]
           });
           printHTML(
             `<span style='color:${theme.info}'>Complete weaken `
             + `<span style='color:${theme.money}'>${victim}</span>, start `
             + `<span style='color:${theme.money}'>growth</span> with `
-            + `<span style='color:${theme.money}'>(g:${growPerGroup} w:${weakPerGroup}):${n}</span>;\nCurrent money: `
+            + `<span style='color:${theme.money}'>(g:1 w:${weakPerGroup}):${growNeed}</span>;\nCurrent money: `
             + `<span style='color:${theme.money}'>${money(currentMoney)}</span>, maximal money: `
             + `<span style='color:${theme.money}'>${money(maxMoney)}</span>;` +
             `</span>`);
@@ -114,16 +119,16 @@ export async function main(ns) {
           addScript({
             n: Infinity,
             group: [
-              { name: 'hacker.js', n: 1, args: [victim, weakTime - hackTime + 1000], onRun: logId },
-              { name: 'grower.js', n: growNeed, args: [victim, weakTime - growTime + 1000], onRun: logId },
+              { name: 'hacker.js', n: 1, args: [victim, weakTime - hackTime + 500], onRun: logId },
+              { name: 'grower.js', n: growNeed, args: [victim, weakTime - growTime + 500], onRun: logId },
               { name: 'weaker.js', n: weakNeed, args: [victim, 1000], onRun: logId },
             ]
           });
           printHTML(
-            `<span style='color:${theme.info}'>Complete weaken `
+            `<span style='color:${theme.info}'>Complete growth `
             + `<span style='color:${theme.money}'>${victim}</span>, start `
             + `<span style='color:${theme.money}'>hacking</span> with `
-            + `<span style='color:${theme.money}'>h: 1 g:${growNeed} w:${weakNeed}</span>;` +
+            + `<span style='color:${theme.money}'>(h: 1 g:${growNeed} w:${weakNeed}):∞</span>;` +
             `</span>`);
           break;
         }

@@ -266,7 +266,7 @@ export function hackAll(ns) {
   const theme = ns.ui.getTheme();
   for (let host in extra.tree) {
     ns.scp(ns.ls('home', '.js'), host, 'home');
-    if (extra.hacked[host]) continue;
+    if (host == 'home' || extra.hacked[host]) continue;
     if (ns.hasRootAccess(host)) {
       extra.hacked[host] = {};
     } else if (sudo(ns, host)) {
