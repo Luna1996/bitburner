@@ -116,7 +116,7 @@ export async function main(ns) {
             group: [
               { name: 'hacker.js', n: 1, args: [victim, weakTime - hackTime + 1000], onRun: logId },
               { name: 'grower.js', n: growNeed, args: [victim, weakTime - growTime + 1000], onRun: logId },
-              { name: 'weaker.js', n: weakNeed, args: [victim, 1000], onRun: logId },
+              { name: 'weaker.js', n: weakNeed + 2, args: [victim, 1000], onRun: logId },
             ]
           });
           printHTML(
