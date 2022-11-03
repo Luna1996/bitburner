@@ -685,88 +685,63 @@ export const ContractSolvers = {
    * 
   */
   "Proper 2-Coloring of a Graph": ([n, edges]) => {
-    
+    /** @type {boolean[][]} */
+    const map = [];
+    map.length = n;
+    for (let i = 0; i < n; i++) {
+      map[i] = {};
+      map[i].length = n;
+    }
+    for (const [a, b] of edges) {
+      map[a][b] = true;
+      map[b][a] = true;
+    }
+
+    const res = [0];
+    const next = [0];
+    while (next.length > 0) {
+      const i = next.shift();
+      const v = res[i];
+      for (const j of map[i]) {
+        if (j) {
+          if (res[j] == undefined) {
+            res[j] = 1 - v;
+            next.push(j);
+          } else if (res[j] == v) {
+            return [];
+          }
+        }
+      }
+    }
+
+    for (let i = 0; i < n; i++) {
+      if (res[i] == undefined) {
+        res[i] = 0;
+      }
+    }
+
+    return res;
   },
-  // {
-  //   name: "Compression I: RLE Compression",
-  //     difficulty: 2,
-  //       numTries: 10,
-  //         desc: (plaintext: unknown): string => {
-  //           return [
-  //             "Run-length encoding (RLE) is a data compression technique which encodes data as a series of runs of",
-  //             "a repeated single character. Runs are encoded as a length, followed by the character itself. Lengths",
-  //             "are encoded as a single ASCII digit; runs of 10 characters or more are encoded by splitting them",
-  //             "into multiple runs.\n\n",
-  //             "You are given the following input string:\n",
-  //             `&nbsp; &nbsp; ${plaintext}\n`,
-  //             "Encode it using run-length encoding with the minimum possible output length.\n\n",
-  //             "Examples:\n",
-  //             "&nbsp; &nbsp; aaaaabccc &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;-> &nbsp;5a1b3c\n",
-  //             "&nbsp; &nbsp; aAaAaA &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; -> &nbsp;1a1A1a1A1a1A\n",
-  //             "&nbsp; &nbsp; 111112333 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;-> &nbsp;511233\n",
-  //             "&nbsp; &nbsp; zzzzzzzzzzzzzzzzzzz &nbsp;-> &nbsp;9z9z1z &nbsp;(or 9z8z2z, etc.)\n",
-  //           ].join(" ");
-  //         },
-  //           gen: (): string => {
-  //             const length = 50 + Math.floor(25 * (Math.random() + Math.random()));
-  //             let plain = "";
 
-  //             while (plain.length < length) {
-  //               const r = Math.random();
-
-  //               let n = 1;
-  //               if (r < 0.3) {
-  //                 n = 1;
-  //               } else if (r < 0.6) {
-  //                 n = 2;
-  //               } else if (r < 0.9) {
-  //                 n = Math.floor(10 * Math.random());
-  //               } else {
-  //                 n = 10 + Math.floor(5 * Math.random());
-  //               }
-
-  //               const c = comprGenChar();
-  //               plain += c.repeat(n);
-  //             }
-
-  //             return plain.substring(0, length);
-  //           },
-  //             solver: (plain: unknown, ans: string): boolean => {
-  //               if (typeof plain !== "string") throw new Error("solver expected string");
-  //               if (ans.length % 2 !== 0) {
-  //                 return false;
-  //               }
-
-  //               let ans_plain = "";
-  //               for (let i = 0; i + 1 < ans.length; i += 2) {
-  //                 const length = ans.charCodeAt(i) - 0x30;
-  //                 if (length < 0 || length > 9) {
-  //                   return false;
-  //                 }
-
-  //                 ans_plain += ans[i + 1].repeat(length);
-  //               }
-  //               if (ans_plain !== plain) {
-  //                 return false;
-  //               }
-
-  //               let length = 0;
-  //               for (let i = 0; i < plain.length;) {
-  //                 let run_length = 1;
-  //                 while (i + run_length < plain.length && plain[i + run_length] === plain[i]) {
-  //                   ++run_length;
-  //                 }
-  //                 i += run_length;
-
-  //                 while (run_length > 0) {
-  //                   run_length -= 9;
-  //                   length += 2;
-  //                 }
-  //               }
-
-  //               return ans.length <= length;
-  //             },
-  //   },
+  /**
+   * Run-length encoding (RLE) is a data compression technique which encodes data as a series of runs of
+   * a repeated single character. Runs are encoded as a length, followed by the character itself. Lengths
+   * are encoded as a single ASCII digit; runs of 10 characters or more are encoded by splitting them
+   * into multiple runs.
+   * You are given the following input string: {@link str}
+   * Encode it using run-length encoding with the minimum possible output length.
+   * Examples:
+   *  aaaaabccc -> 5a1b3c
+   *  aAaAaA  -> 1a1A1a1A1a1A
+   *  111112333 -> 511233
+   *  zzzzzzzzzzzzzzzzzzz -> 9z9z1z (or 9z8z2z, etc.)
+   * 
+   * @param {string} str
+  */
+  "Compression I: RLE Compression": (str) => {
+    let res = '';
+    let cnt = 0;
+  },
   // {
   //   name: "Compression II: LZ Decompression",
   //     difficulty: 4,
