@@ -737,336 +737,137 @@ export const ContractSolvers = {
    *  zzzzzzzzzzzzzzzzzzz -> 9z9z1z (or 9z8z2z, etc.)
    * 
    * @param {string} str
+   * @return {string}
   */
   "Compression I: RLE Compression": (str) => {
     let rle = '';
     let n = 0;
     let last;
     for (const c of str) {
-      if (last && last != c && n != 0) {
+      if (n == 9 || (last && last != c && n != 0)) {
         rle += `${n}${c}`;
         n = 0;
       }
       last = c;
       n++;
-      if (n == 9) { }
     }
+    return `${rle}${n}${c}`;
   },
-  // {
-  //   name: "Compression II: LZ Decompression",
-  //     difficulty: 4,
-  //       numTries: 10,
-  //         desc: (compressed: unknown): string => {
-  //           return [
-  //             "Lempel-Ziv (LZ) compression is a data compression technique which encodes data using references to",
-  //             "earlier parts of the data. In this variant of LZ, data is encoded in two types of chunk. Each chunk",
-  //             "begins with a length L, encoded as a single ASCII digit from 1 to 9, followed by the chunk data,",
-  //             "which is either:\n\n",
-  //             "1. Exactly L characters, which are to be copied directly into the uncompressed data.\n",
-  //             "2. A reference to an earlier part of the uncompressed data. To do this, the length is followed",
-  //             "by a second ASCII digit X: each of the L output characters is a copy of the character X",
-  //             "places before it in the uncompressed data.\n\n",
-  //             "For both chunk types, a length of 0 instead means the chunk ends immediately, and the next character",
-  //             "is the start of a new chunk. The two chunk types alternate, starting with type 1, and the final",
-  //             "chunk may be of either type.\n\n",
-  //             "You are given the following LZ-encoded string:\n",
-  //             `&nbsp; &nbsp; ${compressed}\n`,
-  //             "Decode it and output the original string.\n\n",
-  //             "Example: decoding '5aaabb450723abb' chunk-by-chunk\n",
-  //             "&nbsp; &nbsp; 5aaabb &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; -> &nbsp;aaabb\n",
-  //             "&nbsp; &nbsp; 5aaabb45 &nbsp; &nbsp; &nbsp; &nbsp; -> &nbsp;aaabbaaab\n",
-  //             "&nbsp; &nbsp; 5aaabb450 &nbsp; &nbsp; &nbsp; &nbsp;-> &nbsp;aaabbaaab\n",
-  //             "&nbsp; &nbsp; 5aaabb45072 &nbsp; &nbsp; &nbsp;-> &nbsp;aaabbaaababababa\n",
-  //             "&nbsp; &nbsp; 5aaabb450723abb &nbsp;-> &nbsp;aaabbaaababababaabb",
-  //           ].join(" ");
-  //         },
-  //           gen: (): string => {
-  //             return comprLZEncode(comprLZGenerate());
-  //           },
-  //             solver: (compr: unknown, ans: string): boolean => {
-  //               if (typeof compr !== "string") throw new Error("solver expected string");
-  //               return ans === comprLZDecode(compr);
-  //             },
-  //   },
-  // {
-  //   name: "Compression III: LZ Compression",
-  //     difficulty: 10,
-  //       numTries: 10,
-  //         desc: (plaintext: unknown): string => {
-  //           return [
-  //             "Lempel-Ziv (LZ) compression is a data compression technique which encodes data using references to",
-  //             "earlier parts of the data. In this variant of LZ, data is encoded in two types of chunk. Each chunk",
-  //             "begins with a length L, encoded as a single ASCII digit from 1 to 9, followed by the chunk data,",
-  //             "which is either:\n\n",
-  //             "1. Exactly L characters, which are to be copied directly into the uncompressed data.\n",
-  //             "2. A reference to an earlier part of the uncompressed data. To do this, the length is followed",
-  //             "by a second ASCII digit X: each of the L output characters is a copy of the character X",
-  //             "places before it in the uncompressed data.\n\n",
-  //             "For both chunk types, a length of 0 instead means the chunk ends immediately, and the next character",
-  //             "is the start of a new chunk. The two chunk types alternate, starting with type 1, and the final",
-  //             "chunk may be of either type.\n\n",
-  //             "You are given the following input string:\n",
-  //             `&nbsp; &nbsp; ${plaintext}\n`,
-  //             "Encode it using Lempel-Ziv encoding with the minimum possible output length.\n\n",
-  //             "Examples (some have other possible encodings of minimal length):\n",
-  //             "&nbsp; &nbsp; abracadabra &nbsp; &nbsp; -> &nbsp;7abracad47\n",
-  //             "&nbsp; &nbsp; mississippi &nbsp; &nbsp; -> &nbsp;4miss433ppi\n",
-  //             "&nbsp; &nbsp; aAAaAAaAaAA &nbsp; &nbsp; -> &nbsp;3aAA53035\n",
-  //             "&nbsp; &nbsp; 2718281828 &nbsp; &nbsp; &nbsp;-> &nbsp;627182844\n",
-  //             "&nbsp; &nbsp; abcdefghijk &nbsp; &nbsp; -> &nbsp;9abcdefghi02jk\n",
-  //             "&nbsp; &nbsp; aaaaaaaaaaaa &nbsp; &nbsp;-> &nbsp;3aaa91\n",
-  //             "&nbsp; &nbsp; aaaaaaaaaaaaa &nbsp; -> &nbsp;1a91031\n",
-  //             "&nbsp; &nbsp; aaaaaaaaaaaaaa &nbsp;-> &nbsp;1a91041",
-  //           ].join(" ");
-  //         },
-  //           gen: (): string => {
-  //             return comprLZGenerate();
-  //           },
-  //             solver: (plain: unknown, ans: string): boolean => {
-  //               if (typeof plain !== "string") throw new Error("solver expected string");
-  //               return comprLZDecode(ans) === plain && ans.length <= comprLZEncode(plain).length;
-  //             },
-  //   },
-  // {
-  //   desc: (_data: unknown): string => {
-  //     if (!Array.isArray(_data)) throw new Error("data should be array of string");
-  //     const data = _data as [string, number];
-  //     return [
-  //       "Caesar cipher is one of the simplest encryption technique.",
-  //       "It is a type of substitution cipher in which each letter in the plaintext ",
-  //       "is replaced by a letter some fixed number of positions down the alphabet.",
-  //       "For example, with a left shift of 3, D would be replaced by A, ",
-  //       "E would become B, and A would become X (because of rotation).\n\n",
-  //       "You are given an array with two elements:\n",
-  //       `&nbsp;&nbsp;["${data[0]}", ${data[1]}]\n`,
-  //       "The first element is the plaintext, the second element is the left shift value.\n\n",
-  //       "Return the ciphertext as uppercase string. Spaces remains the same.",
-  //     ].join(" ");
-  //   },
-  //     difficulty: 1,
-  //       gen: (): [string, number] => {
-  //         // return [plaintext, shift value]
-  //         const words = [
-  //           "ARRAY",
-  //           "CACHE",
-  //           "CLOUD",
-  //           "DEBUG",
-  //           "EMAIL",
-  //           "ENTER",
-  //           "FLASH",
-  //           "FRAME",
-  //           "INBOX",
-  //           "LINUX",
-  //           "LOGIC",
-  //           "LOGIN",
-  //           "MACRO",
-  //           "MEDIA",
-  //           "MODEM",
-  //           "MOUSE",
-  //           "PASTE",
-  //           "POPUP",
-  //           "PRINT",
-  //           "QUEUE",
-  //           "SHELL",
-  //           "SHIFT",
-  //           "TABLE",
-  //           "TRASH",
-  //           "VIRUS",
-  //         ];
-  //         return [
-  //           words
-  //             .sort(() => Math.random() - 0.5)
-  //             .slice(0, 5)
-  //             .join(" "),
-  //           Math.floor(Math.random() * 25 + 1),
-  //         ];
-  //       },
-  //         name: "Encryption I: Caesar Cipher",
-  //           numTries: 10,
-  //             solver: (_data: unknown, ans: string): boolean => {
-  //               if (!Array.isArray(_data)) throw new Error("data should be array of string");
-  //               const data = _data as [string, number];
-  //               // data = [plaintext, shift value]
-  //               // build char array, shifting via map and join to final results
-  //               const cipher = [...data[0]]
-  //                 .map((a) => (a === " " ? a : String.fromCharCode(((a.charCodeAt(0) - 65 - data[1] + 26) % 26) + 65)))
-  //                 .join("");
-  //               return cipher === ans;
-  //             },
-  //   },
-  // {
-  //   desc: (_data: unknown): string => {
-  //     if (!Array.isArray(_data)) throw new Error("data should be array of string");
-  //     const data = _data as [string, string];
-  //     return [
-  //       "Vigenère cipher is a type of polyalphabetic substitution. It uses ",
-  //       "the Vigenère square to encrypt and decrypt plaintext with a keyword.\n\n",
-  //       "&nbsp;&nbsp;Vigenère square:\n",
-  //       "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;A B C D E F G H I J K L M N O P Q R S T U V W X Y Z \n",
-  //       "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; +----------------------------------------------------\n",
-  //       "&nbsp;&nbsp;&nbsp;&nbsp; A | A B C D E F G H I J K L M N O P Q R S T U V W X Y Z \n",
-  //       "&nbsp;&nbsp;&nbsp;&nbsp; B | B C D E F G H I J K L M N O P Q R S T U V W X Y Z A \n",
-  //       "&nbsp;&nbsp;&nbsp;&nbsp; C | C D E F G H I J K L M N O P Q R S T U V W X Y Z A B\n",
-  //       "&nbsp;&nbsp;&nbsp;&nbsp; D | D E F G H I J K L M N O P Q R S T U V W X Y Z A B C\n",
-  //       "&nbsp;&nbsp;&nbsp;&nbsp; E | E F G H I J K L M N O P Q R S T U V W X Y Z A B C D\n",
-  //       "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...\n",
-  //       "&nbsp;&nbsp;&nbsp;&nbsp; Y | Y Z A B C D E F G H I J K L M N O P Q R S T U V W X\n",
-  //       "&nbsp;&nbsp;&nbsp;&nbsp; Z | Z A B C D E F G H I J K L M N O P Q R S T U V W X Y\n\n",
-  //       "For encryption each letter of the plaintext is paired with the corresponding letter of a repeating keyword.",
-  //       "For example, the plaintext DASHBOARD is encrypted with the keyword LINUX:\n",
-  //       "&nbsp;&nbsp; Plaintext: DASHBOARD\n",
-  //       "&nbsp;&nbsp; Keyword:&nbsp;&nbsp;&nbsp;LINUXLINU\n",
-  //       "So, the first letter D is paired with the first letter of the key L. Therefore, row D and column L of the ",
-  //       "Vigenère square are used to get the first cipher letter O. This must be repeated for the whole ciphertext.\n\n",
-  //       "You are given an array with two elements:\n",
-  //       `&nbsp;&nbsp;["${data[0]}", "${data[1]}"]\n`,
-  //       "The first element is the plaintext, the second element is the keyword.\n\n",
-  //       "Return the ciphertext as uppercase string.",
-  //     ].join(" ");
-  //   },
-  //     difficulty: 2,
-  //       gen: (): [string, string] => {
-  //         // return [plaintext, keyword]
-  //         const words = [
-  //           "ARRAY",
-  //           "CACHE",
-  //           "CLOUD",
-  //           "DEBUG",
-  //           "EMAIL",
-  //           "ENTER",
-  //           "FLASH",
-  //           "FRAME",
-  //           "INBOX",
-  //           "LINUX",
-  //           "LOGIC",
-  //           "LOGIN",
-  //           "MACRO",
-  //           "MEDIA",
-  //           "MODEM",
-  //           "MOUSE",
-  //           "PASTE",
-  //           "POPUP",
-  //           "PRINT",
-  //           "QUEUE",
-  //           "SHELL",
-  //           "SHIFT",
-  //           "TABLE",
-  //           "TRASH",
-  //           "VIRUS",
-  //         ];
-  //         const keys = [
-  //           "ALGORITHM",
-  //           "BANDWIDTH",
-  //           "BLOGGER",
-  //           "BOOKMARK",
-  //           "BROADBAND",
-  //           "BROWSER",
-  //           "CAPTCHA",
-  //           "CLIPBOARD",
-  //           "COMPUTING",
-  //           "COMMAND",
-  //           "COMPILE",
-  //           "COMPRESS",
-  //           "COMPUTER",
-  //           "CONFIGURE",
-  //           "DASHBOARD",
-  //           "DATABASE",
-  //           "DESKTOP",
-  //           "DIGITAL",
-  //           "DOCUMENT",
-  //           "DOWNLOAD",
-  //           "DYNAMIC",
-  //           "EMOTICON",
-  //           "ENCRYPT",
-  //           "EXABYTE",
-  //           "FIREWALL",
-  //           "FIRMWARE",
-  //           "FLAMING",
-  //           "FLOWCHART",
-  //           "FREEWARE",
-  //           "GIGABYTE",
-  //           "GRAPHICS",
-  //           "HARDWARE",
-  //           "HYPERLINK",
-  //           "HYPERTEXT",
-  //           "INTEGER",
-  //           "INTERFACE",
-  //           "INTERNET",
-  //           "ITERATION",
-  //           "JOYSTICK",
-  //           "JUNKMAIL",
-  //           "KEYBOARD",
-  //           "KEYWORD",
-  //           "LURKING",
-  //           "MACINTOSH",
-  //           "MAINFRAME",
-  //           "MALWARE",
-  //           "MONITOR",
-  //           "NETWORK",
-  //           "NOTEBOOK",
-  //           "COMPUTER",
-  //           "OFFLINE",
-  //           "OPERATING",
-  //           "PASSWORD",
-  //           "PHISHING",
-  //           "PLATFORM",
-  //           "PODCAST",
-  //           "PRINTER",
-  //           "PRIVACY",
-  //           "PROCESS",
-  //           "PROGRAM",
-  //           "PROTOCOL",
-  //           "REALTIME",
-  //           "RESTORE",
-  //           "RUNTIME",
-  //           "SCANNER",
-  //           "SECURITY",
-  //           "SHAREWARE",
-  //           "SNAPSHOT",
-  //           "SOFTWARE",
-  //           "SPAMMER",
-  //           "SPYWARE",
-  //           "STORAGE",
-  //           "TERMINAL",
-  //           "TEMPLATE",
-  //           "TERABYTE",
-  //           "TOOLBAR",
-  //           "TYPEFACE",
-  //           "USERNAME",
-  //           "UTILITY",
-  //           "VERSION",
-  //           "VIRTUAL",
-  //           "WEBMASTER",
-  //           "WEBSITE",
-  //           "WINDOWS",
-  //           "WIRELESS",
-  //           "PROCESSOR",
-  //         ];
-  //         return [
-  //           words
-  //             .sort(() => Math.random() - 0.5)
-  //             .slice(0, 5)
-  //             .join(""),
-  //           keys.sort(() => Math.random() - 0.5)[0],
-  //         ];
-  //       },
-  //         name: "Encryption II: Vigenère Cipher",
-  //           numTries: 10,
-  //             solver: (_data: unknown, ans: string): boolean => {
-  //               if (!Array.isArray(_data)) throw new Error("data should be array of string");
-  //               const data = _data as [string, string];
-  //               // data = [plaintext, keyword]
-  //               // build char array, shifting via map and corresponding keyword letter and join to final results
-  //               const cipher = [...data[0]]
-  //                 .map((a, i) => {
-  //                   return a === " "
-  //                     ? a
-  //                     : String.fromCharCode(((a.charCodeAt(0) - 2 * 65 + data[1].charCodeAt(i % data[1].length)) % 26) + 65);
-  //                 })
-  //                 .join("");
-  //               return cipher === ans;
-  //             },
-  //   },
+
+  /**
+   * Lempel-Ziv (LZ) compression is a data compression technique which encodes data using references to
+   * earlier parts of the data. In this variant of LZ, data is encoded in two types of chunk. Each chunk
+   * begins with a length L, encoded as a single ASCII digit from 1 to 9, followed by the chunk data,
+   * which is either:
+   * 1. Exactly L characters, which are to be copied directly into the uncompressed data.
+   * 2. A reference to an earlier part of the uncompressed data. To do this, the length is followed
+   * by a second ASCII digit X: each of the L output characters is a copy of the character X
+   * places before it in the uncompressed data.
+   * For both chunk types, a length of 0 instead means the chunk ends immediately, and the next character
+   * is the start of a new chunk. The two chunk types alternate, starting with type 1, and the final
+   * chunk may be of either type.
+   * You are given the following LZ-encoded string: {@link encode}
+   * Decode it and output the original string.
+   * Example: decoding '5aaabb450723abb' chunk-by-chunk
+   *  5aaabb -> aaabb
+   *  5aaabb45 -> aaabbaaab
+   *  5aaabb450 -> aaabbaaab
+   *  5aaabb45072 -> aaabbaaababababa
+   *  5aaabb450723abb -> aaabbaaababababaabb
+   * 
+   * @param {string} plain
+   * @return {string}
+  */
+  "Compression II: LZ Decompression": (encode) => {
+    return comprLZDecode(encode);
+  },
+
+  /**
+   * Lempel-Ziv (LZ) compression is a data compression technique which encodes data using references to
+   * earlier parts of the data. In this variant of LZ, data is encoded in two types of chunk. Each chunk
+   * begins with a length L, encoded as a single ASCII digit from 1 to 9, followed by the chunk data,
+   * which is either:
+   * 1. Exactly L characters, which are to be copied directly into the uncompressed data.
+   * 2. A reference to an earlier part of the uncompressed data. To do this, the length is followed
+   * by a second ASCII digit X: each of the L output characters is a copy of the character X
+   * places before it in the uncompressed data.
+   * For both chunk types, a length of 0 instead means the chunk ends immediately, and the next character
+   * is the start of a new chunk. The two chunk types alternate, starting with type 1, and the final
+   * chunk may be of either type.
+   * You are given the following input string: {@link plain}
+   * Encode it using Lempel-Ziv encoding with the minimum possible output length
+   * Examples (some have other possible encodings of minimal length):
+   *  abracadabra -> 7abracad47
+   *  mississippi -> 4miss433ppi
+   *  aAAaAAaAaAA -> 3aAA53035
+   *  2718281828 -> 627182844
+   *  abcdefghijk -> 9abcdefghi02jk
+   *  aaaaaaaaaaaa -> 3aaa91
+   *  aaaaaaaaaaaaa -> 1a91031
+   *  aaaaaaaaaaaaaa -> 1a91041
+   * 
+   * @param {string} plain
+   * @return {string}
+  */
+  "Compression III: LZ Compression": (plain) => {
+    return comprLZEncode(plain);
+  },
+
+  /**
+   * Caesar cipher is one of the simplest encryption technique.
+   * It is a type of substitution cipher in which each letter in the plaintext 
+   * is replaced by a letter some fixed number of positions down the alphabet.
+   * For example, with a left shift of 3, D would be replaced by A, 
+   * E would become B, and A would become X (because of rotation).
+   * You are given an array with two elements: [{@link plain}, {@link key}]
+   * The first element is the plaintext, the second element is the left shift value.
+   * Return the ciphertext as uppercase string. Spaces remains the same.
+   * 
+   * @param {[string, number]}
+   * @return {string}
+  */
+  "Encryption I: Caesar Cipher": (plain, key) => {
+    return [...plain]
+      .map((a) => (a === " " ? a : String.fromCharCode(((a.charCodeAt(0) - 65 - key + 26) % 26) + 65)))
+      .join("");
+  },
+
+  /**
+   * Vigenère cipher is a type of polyalphabetic substitution. It uses 
+   * the Vigenère square to encrypt and decrypt plaintext with a keyword.
+   * Vigenère square:
+   * A B C D E F G H I J K L M N O P Q R S T U V W X Y Z
+   *  +----------------------------------------------------\n
+   *  A | A B C D E F G H I J K L M N O P Q R S T U V W X Y Z \n
+   *  B | B C D E F G H I J K L M N O P Q R S T U V W X Y Z A \n
+   *  C | C D E F G H I J K L M N O P Q R S T U V W X Y Z A B\n
+   *  D | D E F G H I J K L M N O P Q R S T U V W X Y Z A B C\n
+   *  E | E F G H I J K L M N O P Q R S T U V W X Y Z A B C D\n
+   * ...
+   *  Y | Y Z A B C D E F G H I J K L M N O P Q R S T U V W X\n
+   *  Z | Z A B C D E F G H I J K L M N O P Q R S T U V W X Y\n\n
+   * For encryption each letter of the plaintext is paired with the corresponding letter of a repeating keyword.
+   * For example, the plaintext DASHBOARD is encrypted with the keyword LINUX:
+   *  Plaintext: DASHBOARD
+   *  Keyword:LINUXLINU
+   * So, the first letter D is paired with the first letter of the key L. Therefore, row D and column L of the 
+   * Vigenère square are used to get the first cipher letter O. This must be repeated for the whole ciphertext.
+   * You are given an array with two elements: [{@link plain}, {@link key}]
+   * The first element is the plaintext, the second element is the keyword.\n\n
+   * Return the ciphertext as uppercase string.
+   * 
+   * @param {[string, string]}
+   * @return {string}
+  */
+  "Encryption II: Vigenère Cipher": ([plain, key]) => {
+    return [...plain]
+      .map((a, i) => {
+        return a === " "
+          ? a
+          : String.fromCharCode(((a.charCodeAt(0) - 2 * 65 + key.charCodeAt(i % key.length)) % 26) + 65);
+      })
+      .join("");
+  }
 }
 
 function HammingEncode(data) {
@@ -1223,4 +1024,167 @@ function HammingDecode(data) {
   /* TODO to avoid ambiguity about endianness why not let the player return the extracted (and corrected)
    * data bits, rather than guessing at how to convert it to a decimal string? */
   return parseInt(ans, 2);
+}
+
+function comprLZDecode(compr) {
+  let plain = "";
+
+  for (let i = 0; i < compr.length;) {
+    const literal_length = compr.charCodeAt(i) - 0x30;
+
+    if (literal_length < 0 || literal_length > 9 || i + 1 + literal_length > compr.length) {
+      return null;
+    }
+
+    plain += compr.substring(i + 1, i + 1 + literal_length);
+    i += 1 + literal_length;
+
+    if (i >= compr.length) {
+      break;
+    }
+    const backref_length = compr.charCodeAt(i) - 0x30;
+
+    if (backref_length < 0 || backref_length > 9) {
+      return null;
+    } else if (backref_length === 0) {
+      ++i;
+    } else {
+      if (i + 1 >= compr.length) {
+        return null;
+      }
+
+      const backref_offset = compr.charCodeAt(i + 1) - 0x30;
+      if ((backref_length > 0 && (backref_offset < 1 || backref_offset > 9)) || backref_offset > plain.length) {
+        return null;
+      }
+
+      for (let j = 0; j < backref_length; ++j) {
+        plain += plain[plain.length - backref_offset];
+      }
+
+      i += 2;
+    }
+  }
+
+  return plain;
+}
+
+function comprLZEncode(plain) {
+  // for state[i][j]:
+  //      if i is 0, we're adding a literal of length j
+  //      else, we're adding a backreference of offset i and length j
+  let cur_state = Array.from(Array(10), () => Array(10).fill(null));
+  let new_state = Array.from(Array(10), () => Array(10));
+
+  function set(state, i, j, str) {
+    const current = state[i][j];
+    if (current == null || str.length < current.length) {
+      state[i][j] = str;
+    } else if (str.length === current.length && Math.random() < 0.5) {
+      // if two strings are the same length, pick randomly so that
+      // we generate more possible inputs to Compression II
+      state[i][j] = str;
+    }
+  }
+
+  // initial state is a literal of length 1
+  cur_state[0][1] = "";
+
+  for (let i = 1; i < plain.length; ++i) {
+    for (const row of new_state) {
+      row.fill(null);
+    }
+    const c = plain[i];
+
+    // handle literals
+    for (let length = 1; length <= 9; ++length) {
+      const string = cur_state[0][length];
+      if (string == null) {
+        continue;
+      }
+
+      if (length < 9) {
+        // extend current literal
+        set(new_state, 0, length + 1, string);
+      } else {
+        // start new literal
+        set(new_state, 0, 1, string + "9" + plain.substring(i - 9, i) + "0");
+      }
+
+      for (let offset = 1; offset <= Math.min(9, i); ++offset) {
+        if (plain[i - offset] === c) {
+          // start new backreference
+          set(new_state, offset, 1, string + String(length) + plain.substring(i - length, i));
+        }
+      }
+    }
+
+    // handle backreferences
+    for (let offset = 1; offset <= 9; ++offset) {
+      for (let length = 1; length <= 9; ++length) {
+        const string = cur_state[offset][length];
+        if (string == null) {
+          continue;
+        }
+
+        if (plain[i - offset] === c) {
+          if (length < 9) {
+            // extend current backreference
+            set(new_state, offset, length + 1, string);
+          } else {
+            // start new backreference
+            set(new_state, offset, 1, string + "9" + String(offset) + "0");
+          }
+        }
+
+        // start new literal
+        set(new_state, 0, 1, string + String(length) + String(offset));
+
+        // end current backreference and start new backreference
+        for (let new_offset = 1; new_offset <= Math.min(9, i); ++new_offset) {
+          if (plain[i - new_offset] === c) {
+            set(new_state, new_offset, 1, string + String(length) + String(offset) + "0");
+          }
+        }
+      }
+    }
+
+    const tmp_state = new_state;
+    new_state = cur_state;
+    cur_state = tmp_state;
+  }
+
+  let result = null;
+
+  for (let len = 1; len <= 9; ++len) {
+    let string = cur_state[0][len];
+    if (string == null) {
+      continue;
+    }
+
+    string += String(len) + plain.substring(plain.length - len, plain.length);
+    if (result == null || string.length < result.length) {
+      result = string;
+    } else if (string.length == result.length && Math.random() < 0.5) {
+      result = string;
+    }
+  }
+
+  for (let offset = 1; offset <= 9; ++offset) {
+    for (let len = 1; len <= 9; ++len) {
+      let string = cur_state[offset][len];
+      if (string == null) {
+        continue;
+      }
+
+      string += String(len) + "" + String(offset);
+      if (result == null || string.length < result.length) {
+        result = string;
+      } else if (string.length == result.length && Math.random() < 0.5) {
+        result = string;
+      }
+    }
+  }
+
+  return result ?? "";
 }
