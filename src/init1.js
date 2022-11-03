@@ -7,7 +7,8 @@ export async function main(ns) {
   ns.ui.setStyles(style);
 
   printHTML('Setting alias: main, tree, goto, test, theme;');
-  execRaw('alias main="run main.js"');
+  execRaw('alias main="run init2.js"');
+  execRaw('alias info="run info.js"');
   execRaw('alias tree="run tree.js"');
   execRaw('alias goto="run goto.js"');
   execRaw('alias test="run test.js"');

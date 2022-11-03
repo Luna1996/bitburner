@@ -19,7 +19,16 @@ export async function main(ns) {
   /** @type {number[]} */
   let ids = [];
 
+  let item = null;
+
   function logId(id) { ids.push(id); }
+  function clear() {
+    if (item) item.n = 0;
+    for (const id of ids) ns.kill(id);
+    ids = [];
+  }
+
+  ns.atExit(clear);
 
   while (true) {
     hackAll(ns);
@@ -60,8 +69,7 @@ export async function main(ns) {
       }
     }
     if (phase != newPhase) {
-      for (const id of ids) ns.kill(id);
-      ids = [];
+      clear();
       phase = newPhase;
       switch (phase) {
         case WEAK: {
@@ -69,7 +77,8 @@ export async function main(ns) {
           const minSecurity = ns.getServerMinSecurityLevel(victim);
           const securityPerWeak = ns.weakenAnalyze(1);
           const weakNeed = Math.ceil((currentSecurity - minSecurity) / securityPerWeak);
-          addScript({ name: 'weaker.js', n: weakNeed, args: [victim], onRun: logId });
+          item = { name: 'weaker.js', n: weakNeed, args: [victim], onRun: logId };
+          addScript(item);
           printHTML(
             `<span style='color:${theme.info}'>Find new victim `
             + `<span style='color:${theme.money}'>${victim}</span>, start `
@@ -89,13 +98,14 @@ export async function main(ns) {
           const growTime = ns.getGrowTime(victim);
           const weakTime = ns.getWeakenTime(victim);
           const n = Math.ceil(growNeed / growPerGroup);
-          addScript({
+          item = {
             n,
             group: [
               { name: 'grower.js', n: growPerGroup, args: [victim, weakTime - growTime + 500], onRun: logId },
               { name: 'weaker.js', n: 1, args: [victim, 500], onRun: logId },
             ]
-          });
+          };
+          addScript(item);
           printHTML(
             `<span style='color:${theme.info}'>Complete weaken `
             + `<span style='color:${theme.money}'>${victim}</span>, start `
@@ -118,14 +128,15 @@ export async function main(ns) {
           // const n = Math.ceil((growNeed + weakNeed + 1) / 46);
           // const weakPerGroup = Math.ceil(weakNeed / n);
           // const growPerGroup = Math.ceil(growNeed / n);
-          addScript({
+          item = {
             n: Infinity,
             group: [
               { name: 'hacker.js', n: 1, args: [victim, weakTime - hackTime + 500], onRun: logId },
               { name: 'grower.js', n: growNeed, args: [victim, weakTime - growTime + 500], onRun: logId },
               { name: 'weaker.js', n: weakNeed, args: [victim, 1000], onRun: logId },
             ]
-          });
+          };
+          addScript(item);
           printHTML(
             `<span style='color:${theme.info}'>Complete growth `
             + `<span style='color:${theme.money}'>${victim}</span>, start `

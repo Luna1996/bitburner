@@ -6,13 +6,6 @@
  * @typedef {{n: number, group: Script[]}} ScriptGroup
  */
 
-/** @type {Tree} */
-extra.tree = extra.tree ?? null;
-/** @type {Object.<string, {}>} */
-extra.hacked = extra.hacked ?? { 'home': {} };
-/** @type {(Script|ScriptGroup)[]} */
-extra.scripts = extra.scripts ?? [];
-
 /** @param {Script[]|ScriptGroup[]} list */
 export function addScript(...list) {
   for (const item of list) {
@@ -23,7 +16,7 @@ export function addScript(...list) {
       }
     }
   }
-  extra.scripts.push(...list);
+  extra.scripts.unshift(...list);
 }
 
 /** @param {NS} ns */
@@ -33,6 +26,10 @@ export function runScript(ns) {
   const theme = ns.ui.getTheme();
   for (let i = extra.scripts.length - 1; i >= 0; i--) {
     const item = extra.scripts[i];
+    if (item.n == 0) {
+      extra.scripts.splice(i, 1);
+      continue;
+    }
     if (item.group) {
       const answ = fillJobs(ns, item.group);
       if (answ) {
@@ -63,7 +60,7 @@ export function runScript(ns) {
       const args = script.args;
       const ram = ns.getScriptRam(name, 'home');
       for (const host in extra.hacked) {
-        const ramLeft = ns.getServerMaxRam(host) - ns.getServerUsedRam(host);
+        const ramLeft = extra.hacked[host] - ns.getServerUsedRam(host);
         if (ramLeft >= ram) {
           const n = Math.min(script.n, Math.floor(ramLeft / ram));
           const id = ns.exec(name, host, n, `${time}@${step++}`, ...(args ?? []));
@@ -101,7 +98,7 @@ function fillJobs(ns, scripts) {
   const svrMap = {};
   let totalSvrRam = 0;
   for (const svrName in extra.hacked) {
-    const svrRam = ns.getServerMaxRam(svrName) - ns.getServerUsedRam(svrName);
+    const svrRam = extra.hacked[svrName] - ns.getServerUsedRam(svrName);
     if (svrRam > 0) {
       const svr = { svrName, svrRam };
       svrList.push(svr);
@@ -263,11 +260,10 @@ export function hackAll(ns) {
   for (let host in extra.tree) {
     ns.scp(ns.ls('home', '.js'), host, 'home');
     if (host == 'home' || extra.hacked[host]) continue;
-    if (ns.hasRootAccess(host)) {
-      extra.hacked[host] = {};
-    } else if (sudo(ns, host)) {
-      printHTML(`<span style='color:${theme.success}'>Gain root access of ${host}.</span>`);
-      extra.hacked[host] = {};
+    if (ns.hasRootAccess(host) || sudo(ns, host)) {
+      const ram = ns.getServerMaxRam(host);
+      extra.hacked[host] = ram;
+      extra.totalSvrRam += ram;
     }
   }
 }
@@ -297,7 +293,11 @@ export function sudo(ns, host, act = true) {
       }
     }
   }
-  if (act) { ns.nuke(host); }
+  if (act) {
+    ns.nuke(host);
+    const theme = ns.ui.getTheme();
+    printHTML(`<span style='color:${theme.success}'>Gain root access of ${host}.</span>`);
+  }
   return true;
 }
 
