@@ -739,8 +739,18 @@ export const ContractSolvers = {
    * @param {string} str
   */
   "Compression I: RLE Compression": (str) => {
-    let res = '';
-    let cnt = 0;
+    let rle = '';
+    let n = 0;
+    let last;
+    for (const c of str) {
+      if (last && last != c && n != 0) {
+        rle += `${n}${c}`;
+        n = 0;
+      }
+      last = c;
+      n++;
+      if (n == 9) { }
+    }
   },
   // {
   //   name: "Compression II: LZ Decompression",
