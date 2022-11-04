@@ -2,9 +2,39 @@ import { printHTML } from './tool';
 
 /** @param {import('./tool').NS} ns */
 export async function main(ns) {
-  const list = ns.codingcontract.getContractTypes();
-  for (const item of list) {
-    printHTML(item);
+  const skip = {};
+  while (true) {
+    for (const host in extra.tree) {
+      for (const file of ns.ls(host, 'cct')) {
+        if (skip[host] && skip[host][file]) continue;
+
+        const type = ns.codingcontract.getContractType(file, host);
+        const data = ns.codingcontract.getData(file, host);
+        const answer = ContractSolvers[type](data);
+        const reward = ns.codingcontract.attempt(answer, file, host, { returnReward: true });
+
+        if (reward) {
+          const theme = ns.ui.getTheme();
+          printHTML(
+            `Solve ${file} on ${host} of type ` +
+            `<span style='color:${theme.info}'>'${type}'</span>, ` +
+            `earning reward: <span style='color:${theme.money}'>${reward}</span>`);
+        } else {
+          skip[host] = skip[host] ?? {};
+          skip[host][file] = true;
+          ns.write(
+            'CodingContractLog.txt',
+            `Type: ${type}\n` +
+            `File: ${file} @ ${host}\n` +
+            `Data: ${JSON.stringify(data)}\n` +
+            `Answ: ${JSON.stringify(answer)}\n` +
+            '#'.repeat(80) + '\n',
+            'a');
+        }
+      }
+    }
+
+    await ns.asleep(1000);
   }
 }
 
@@ -16,9 +46,7 @@ export const ContractSolvers = {
    * @return {number}
   */
   "Find Largest Prime Factor": (n) => {
-    if (typeof n !== "number") throw new Error("solver expected number");
     let fac = 2;
-    let n = n;
     while (n > (fac - 1) * (fac - 1)) {
       while (n % fac === 0) {
         n = Math.round(n / fac);
@@ -58,7 +86,6 @@ export const ContractSolvers = {
    * @param {number}
   */
   "Total Ways to Sum": (n) => {
-    if (typeof n !== "number") throw new Error("solver expected number");
     const ways = [1];
     ways.length = n + 1;
     ways.fill(0, 1);
@@ -219,7 +246,7 @@ export const ContractSolvers = {
   },
 
   /**
-   * Given the following string containing only digits: {@link data}, return
+   * Given the following string containing only digits: {@link str}, return
    * an array with all possible valid IP address combinations
    * that can be created from the string.
    * Note that an octet cannot begin with a '0' unless the number
@@ -228,33 +255,26 @@ export const ContractSolvers = {
    * 25525511135 -> ["255.255.11.135", "255.255.111.35"]\n
    * 1938718066 -> ["193.87.180.66"]
    * 
-   * @param {string} data
+   * @param {string} str
    * @return {string[]}
   */
-  "Generate IP Addresses": (data) => {
-    const ret = [];
-    for (let a = 1; a <= 3; ++a) {
-      for (let b = 1; b <= 3; ++b) {
-        for (let c = 1; c <= 3; ++c) {
-          for (let d = 1; d <= 3; ++d) {
-            if (a + b + c + d === data.length) {
-              const A = parseInt(data.substring(0, a), 10);
-              const B = parseInt(data.substring(a, a + b), 10);
-              const C = parseInt(data.substring(a + b, a + b + c), 10);
-              const D = parseInt(data.substring(a + b + c, a + b + c + d), 10);
+  "Generate IP Addresses": (str) => {
+    const answ = [];
+    for (let a = 1; a <= 3; ++a)
+      for (let b = 1; b <= 3; ++b)
+        for (let c = 1; c <= 3; ++c)
+          for (let d = 1; d <= 3; ++d)
+            if (a + b + c + d === str.length) {
+              const A = parseInt(str.substring(0, a), 10);
+              const B = parseInt(str.substring(a, a + b), 10);
+              const C = parseInt(str.substring(a + b, a + b + c), 10);
+              const D = parseInt(str.substring(a + b + c, a + b + c + d), 10);
               if (A <= 255 && B <= 255 && C <= 255 && D <= 255) {
-                const ip = [A.toString(), ".", B.toString(), ".", C.toString(), ".", D.toString()].join("");
-                if (ip.length === data.length + 3) {
-                  ret.push(ip);
-                }
+                const e = [A.toString(), ".", B.toString(), ".", C.toString(), ".", D.toString()].join("");
+                e.length === str.length + 3 && answ.push(e)
               }
             }
-          }
-        }
-      }
-    }
-
-    return ret;
+    return answ;
   },
 
   /**
@@ -524,48 +544,45 @@ export const ContractSolvers = {
    * @return {string[]}
   */
   "Sanitize Parentheses in Expression": (str) => {
-    if (typeof data !== "string") throw new Error("solver expected string");
-    let left = 0;
-    let right = 0;
-    const res = [];
-
-    for (let i = 0; i < data.length; ++i) {
-      if (data[i] === "(") {
-        ++left;
-      } else if (data[i] === ")") {
-        left > 0 ? --left : ++right;
-      }
+    let l = 0; let r = 0; let p = 0;
+    for (const c of str) {
+      if (c == '(') l++;
+      else if (c == ')') r++;
     }
+    p = Math.min(l, r);
+    l -= p; r -= p;
 
-    function dfs(pair, index, left, right, s, solution, res,) {
-      if (s.length === index) {
-        if (left === 0 && right === 0 && pair === 0) {
-          for (let i = 0; i < res.length; i++) {
-            if (res[i] === solution) {
-              return;
-            }
+    let answ = {};
+    let min = Infinity;
+    function dfs(l, r, p, i, exp, n) {
+      if (n > min) return;
+      if (i == str.length) {
+        if (l == 0 && r == 0 && p == 0) {
+          if (n < min) {
+            min = n;
+            answ = {};
           }
-          res.push(solution);
+          answ[exp] = true;
         }
         return;
       }
-
-      if (s[index] === "(") {
-        if (left > 0) {
-          dfs(pair, index + 1, left - 1, right, s, solution, res);
-        }
-        dfs(pair + 1, index + 1, left, right, s, solution + s[index], res);
-      } else if (s[index] === ")") {
-        if (right > 0) dfs(pair, index + 1, left, right - 1, s, solution, res);
-        if (pair > 0) dfs(pair - 1, index + 1, left, right, s, solution + s[index], res);
+      if (str[i] == '(') {
+        dfs(l, r, p + 1, i + 1, exp + '(', n);
+        if (l > 0) dfs(l - 1, r, p, i + 1, exp, n + 1);
+      } else if (str[i] == ')') {
+        if (p > 0) dfs(l, r, p - 1, i + 1, exp + ')', n);
+        if (r > 0) dfs(l, r - 1, p, i + 1, exp, n + 1);
+        if (p == 0 && r == 0) dfs(l + 1, r, p, i + 1, exp, n + 1);
       } else {
-        dfs(pair, index + 1, left, right, s, solution + s[index], res);
+        dfs(l, r, p, i + 1, exp + str[i], n);
       }
     }
 
-    dfs(0, 0, left, right, data, "", res);
+    dfs(l, r, 0, 0, '', 0);
 
-    return res;
+    const list = [];
+    for (const exp in answ) { list.push(exp); }
+    return list;
   },
   /**
    * You are given the following string which contains only digits between 0 and 9: {@link str},
@@ -588,37 +605,30 @@ export const ContractSolvers = {
    * @return {string[]}
   */
   "Find All Valid Math Expressions": ([str, n]) => {
-    const n = data[0];
-    const str = data[1];
+    const L = str.length;
+    const answ = []
 
-    function helper(res, path, num, target, pos, evaluated, multed) {
-      if (pos === num.length) {
-        if (target === evaluated) {
-          res.push(path);
+    /**
+     * @param {number} i
+     * @param {string} exp
+    */
+    function dfs(i, exp) {
+      for (let j = i; j < L; j++) {
+        exp += str.charAt(j);
+        if (j != L - 1) {
+          dfs(j + 1, exp + '+');
+          dfs(j + 1, exp + '-');
+          dfs(j + 1, exp + '*');
+        } else if (eval(exp) == n) {
+          answ.push(exp);
         }
-        return;
-      }
-
-      for (let i = pos; i < num.length; ++i) {
-        if (i != pos && num[pos] == "0") {
-          break;
-        }
-        const cur = parseInt(num.substring(pos, i + 1));
-
-        if (pos === 0) {
-          helper(res, path + cur, num, target, i + 1, cur, cur);
-        } else {
-          helper(res, path + "+" + cur, num, target, i + 1, evaluated + cur, cur);
-          helper(res, path + "-" + cur, num, target, i + 1, evaluated - cur, -cur);
-          helper(res, path + "*" + cur, num, target, i + 1, evaluated - multed + multed * cur, multed * cur);
-        }
+        if (j == i && str.charAt(i) == '0') break;
       }
     }
 
-    const result = [];
-    helper(result, "", n, str, 0, 0, 0);
+    dfs(0, '');
 
-    return result;
+    return answ;
   },
 
   /**
@@ -687,10 +697,8 @@ export const ContractSolvers = {
   "Proper 2-Coloring of a Graph": ([n, edges]) => {
     /** @type {boolean[][]} */
     const map = [];
-    map.length = n;
     for (let i = 0; i < n; i++) {
-      map[i] = {};
-      map[i].length = n;
+      map[i] = [];
     }
     for (const [a, b] of edges) {
       map[a][b] = true;
@@ -702,8 +710,8 @@ export const ContractSolvers = {
     while (next.length > 0) {
       const i = next.shift();
       const v = res[i];
-      for (const j of map[i]) {
-        if (j) {
+      for (let j = 0; j < n; j++) {
+        if (map[i][j]) {
           if (res[j] == undefined) {
             res[j] = 1 - v;
             next.push(j);

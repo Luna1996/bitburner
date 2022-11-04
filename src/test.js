@@ -1,6 +1,6 @@
-import { printHTML } from './tool';
-
 /** @param {import('./tool').NS} ns */
 export async function main(ns) {
-  printHTML(extra.totalSvrRam);
+  while (true) {
+    await ns.hack('zer0');
+  }
 }
